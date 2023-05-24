@@ -33,7 +33,7 @@ class AuthController extends Controller
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|confirmed|min:6',
                 'category' => 'required|string',
-                'business_logo' => 'required',
+                'business_logo' => ['required','image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
                 'business_name' => 'required',
                 'country' => 'required|string',
                 'state' => 'required|string',
@@ -80,11 +80,24 @@ class AuthController extends Controller
 
     public function createNewToken($token)
     {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expire_in' => auth()->factory()->getTTL()*60,
-            'user'=>auth()->user()
-        ]);
+        if(auth()->user()['role'] == 'user')
+        {
+            return response()->json([
+                'access_token'  => $token,
+                'token_type'    => 'bearer',
+                'expire_in'     => auth()->factory()->getTTL()*60,
+                'user'          => auth()->user()->only(['id', 'name', 'email', 'role','phone','address','created_at','updated_at'])
+            ]);
+
+        }else if(auth()->user()['role'] == 'vendor')
+        {
+            return response()->json([
+                'access_token'  => $token,
+                'token_type'    => 'bearer',
+                'expire_in'     => auth()->factory()->getTTL()*60,
+                'user'          => auth()->user()->only(['id', 'business_name', 'email','role', 'category','business_logo','country','state','zip_code','created_at','updated_at'])
+            ]);
+        }
+
     }
 }
