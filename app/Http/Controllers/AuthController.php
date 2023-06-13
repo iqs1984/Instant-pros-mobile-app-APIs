@@ -11,6 +11,7 @@ class AuthController extends Controller
     public function _construct(){
         $this->middleware('auth:api', ['except' => ['login','register']]);
     }
+    
     public function register(Request $request)
     {
 
@@ -67,12 +68,27 @@ class AuthController extends Controller
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors(),422);
+            if($validator->errors()->has('email')){
+                return response()->json(array(
+                    'error'    =>  406,
+                    'message'  =>  "Enter valid email"
+                ), 401);
+            }else if($validator->errors()->has('password')){
+                return response()->json(array(
+                    'error'    =>  406,
+                    'message'  =>  "Enter valid password"
+                ), 401);
+            }
+            
         }
 
+        $user = User::where('email', $request->email)->first();
+
+        if(!$user){
+            return response()->json(['error' => '401','message' => 'Email not found' ],401);
+        } 
         if(!$token = auth()->attempt($validator->validated())){
-            return response()->json(['error' => 'Unauthorized'],401);
-            
+            return response()->json(['error' => '401','message' => 'Incorrect password'],401);
         }
 
         return $this->createNewToken($token);
