@@ -85,10 +85,10 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if(!$user){
-            return response()->json(['error' => '401','message' => 'Email not found' ],401);
+            return response()->json(['error' => 401,'message' => 'Email not found' ],401);
         } 
         if(!$token = auth()->attempt($validator->validated())){
-            return response()->json(['error' => '401','message' => 'Incorrect password'],401);
+            return response()->json(['error' => 401,'message' => 'Incorrect password'],401);
         }
 
         return $this->createNewToken($token);
