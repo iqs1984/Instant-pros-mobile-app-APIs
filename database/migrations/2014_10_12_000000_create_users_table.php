@@ -18,14 +18,14 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('role',['user','vendor']);
-            $table->string('category')->nullable();
+            $table->integer('category')->nullable();
             $table->integer('phone')->nullable();
             $table->string('profile_pic')->nullable();
             $table->string('business_logo')->nullable();
             $table->string('address')->nullable();
-            $table->string('country')->nullable();
-            $table->string('state')->nullable();
-            $table->string('city')->nullable();
+            $table->integer('country')->nullable();
+            $table->integer('state')->nullable();
+            $table->integer('city')->nullable();
             $table->integer('zip_code')->nullable();
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();
