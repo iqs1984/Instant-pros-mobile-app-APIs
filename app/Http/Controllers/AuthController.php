@@ -19,7 +19,7 @@ class AuthController extends Controller
 
             $validator = Validator::make($request->all(), [
                 'role' => 'required|string',
-                'name' => 'required',
+                'name' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|confirmed|min:6',
                 'phone' => 'required|integer',
@@ -33,18 +33,41 @@ class AuthController extends Controller
                 'role' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|confirmed|min:6',
-                'category' => 'required|string',
+                'category' => 'required|integer',
                 'business_logo' => ['required','image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
                 'business_name' => 'required',
-                'country' => 'required|string',
-                'state' => 'required|string',
+                'country' => 'required|integer',
+                'state' => 'required|integer',
                 'zip_code' => 'required|integer',
                 
             ]);
+        }else{
+            return response()->json(array(
+                'error'    =>  400,
+                'message'  =>  "please use valid role user/vendor"
+            ), 400);
         }
 
-        if($validator->fails()){
-            return response()->json($validator->errors()->toJson(),400);
+        if($validator->fails())
+        {
+           
+            return $validator->messages()->toJson();
+           
+            // if($validator->errors()->has('email')){
+            //     return response()->json(array(
+            //         'error'    =>  400,
+            //         'message'  =>  "Email id already register"
+            //     ), 400);
+            // }else if($validator->errors()->has('password')){
+            //     return response()->json(array(
+            //         'error'    =>  400,
+            //         'message'  =>  "Password length must be grater than 6"
+            //     ), 400);
+            // }
+            // else{
+            //     return response()->json($validator->errors()->toJson(),400);
+            // }
+            
         }
 
         $user = User::create(array_merge(
@@ -68,17 +91,18 @@ class AuthController extends Controller
         ]);
 
         if($validator->fails()){
-            if($validator->errors()->has('email')){
-                return response()->json(array(
-                    'error'    =>  406,
-                    'message'  =>  "Enter valid email"
-                ), 401);
-            }else if($validator->errors()->has('password')){
-                return response()->json(array(
-                    'error'    =>  406,
-                    'message'  =>  "Enter valid password"
-                ), 401);
-            }
+            return $validator->messages()->toJson();
+            // if($validator->errors()->has('email')){
+            //     return response()->json(array(
+            //         'error'    =>  406,
+            //         'message'  =>  "Enter valid email"
+            //     ), 401);
+            // }else if($validator->errors()->has('password')){
+            //     return response()->json(array(
+            //         'error'    =>  406,
+            //         'message'  =>  "Enter valid password"
+            //     ), 401);
+            // }
             
         }
 
