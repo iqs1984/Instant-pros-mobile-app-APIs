@@ -24,8 +24,11 @@ return new class extends Migration
             $table->string('business_logo')->nullable();
             $table->string('address')->nullable();
             $table->integer('country_id')->nullable();
+            $table->string('country_name')->nullable();
             $table->integer('state_id')->nullable();
+            $table->string('state_name')->nullable();
             $table->integer('city_id')->nullable();
+            $table->string('city_name')->nullable();
             $table->integer('zip_code')->nullable();
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();

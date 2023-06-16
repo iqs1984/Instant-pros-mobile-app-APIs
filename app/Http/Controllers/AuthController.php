@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
 use Auth;
 use Validator;
+use App\Models\User;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
+
 class AuthController extends Controller
 {
     public function _construct(){
@@ -14,6 +18,9 @@ class AuthController extends Controller
     
     public function register(Request $request)
     {
+        $country_name = "";
+        $state_name = "";
+        $city_name = "";
 
         if($request->role == 'user'){
 
@@ -26,15 +33,17 @@ class AuthController extends Controller
                 'address' => 'required|string',
             ]);
     
-           
         }else if($request->role == 'vendor'){
+
+            $country_name = Country::find($request->country_id)->first('country_name');
+            $state_name = State::find($request->state_id)->first('state_name');
+            $city_name = City::find($request->city_id)->first('city_name');
 
             $validator = Validator::make($request->all(), [
                 'role' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|confirmed|min:6',
                 'category' => 'required|integer',
-                'business_logo' => ['required','image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
                 'business_name' => 'required',
                 'country_id' => 'required|integer',
                 'state_id' => 'required|integer',
@@ -43,6 +52,7 @@ class AuthController extends Controller
                 'zip_code' => 'required|integer',
                 
             ]);
+
         }else{
             return response()->json(array(
                 'error'    =>  400,
@@ -52,30 +62,24 @@ class AuthController extends Controller
 
         if($validator->fails())
         {
-           
             return $validator->messages()->toJson();
-           
-            // if($validator->errors()->has('email')){
-            //     return response()->json(array(
-            //         'error'    =>  400,
-            //         'message'  =>  "Email id already register"
-            //     ), 400);
-            // }else if($validator->errors()->has('password')){
-            //     return response()->json(array(
-            //         'error'    =>  400,
-            //         'message'  =>  "Password length must be grater than 6"
-            //     ), 400);
-            // }
-            // else{
-            //     return response()->json($validator->errors()->toJson(),400);
-            // }
-            
         }
 
-        $user = User::create(array_merge(
-            $validator->validated(),
-            ['password' => bcrypt($request->password)]
-        ));
+        if($request->role == 'user'){
+            $user = User::create(array_merge(
+                $validator->validated(),
+                ['password' => bcrypt($request->password)]
+            ));
+        }else{
+            $user = User::create(array_merge(
+                $validator->validated(),
+                [   'country_name'  => $country_name['country_name'],
+                    'state_name'    => $state_name['state_name'],
+                    'city_name'     => $city_name['city_name'],
+                    'password'      => bcrypt($request->password)]
+            ));
+        }
+
         return response()->json([
             'message' => ucwords($request->role).' Successfully Register',
             'user' => $user,
@@ -89,23 +93,10 @@ class AuthController extends Controller
             
             'email' => 'required|email',
             'password' => 'required|string|min:6',
-           
         ]);
 
         if($validator->fails()){
             return $validator->messages()->toJson();
-            // if($validator->errors()->has('email')){
-            //     return response()->json(array(
-            //         'error'    =>  406,
-            //         'message'  =>  "Enter valid email"
-            //     ), 401);
-            // }else if($validator->errors()->has('password')){
-            //     return response()->json(array(
-            //         'error'    =>  406,
-            //         'message'  =>  "Enter valid password"
-            //     ), 401);
-            // }
-            
         }
 
         $user = User::where('email', $request->email)->first();
@@ -137,7 +128,7 @@ class AuthController extends Controller
                 'access_token'  => $token,
                 'token_type'    => 'bearer',
                 'expire_in'     => auth()->factory()->getTTL()*60,
-                'user'          => auth()->user()->only(['id', 'business_name', 'email','role', 'category','business_logo','country','state','zip_code','created_at','updated_at'])
+                'user'          => auth()->user()->only(['id', 'business_name', 'email','role', 'category','business_logo','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','created_at','updated_at'])
             ]);
         }
 
