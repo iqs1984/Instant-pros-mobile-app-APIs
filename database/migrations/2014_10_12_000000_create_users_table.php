@@ -23,9 +23,9 @@ return new class extends Migration
             $table->string('profile_pic')->nullable();
             $table->string('business_logo')->nullable();
             $table->string('address')->nullable();
-            $table->integer('country')->nullable();
-            $table->integer('state')->nullable();
-            $table->integer('city')->nullable();
+            $table->integer('country_id')->nullable();
+            $table->integer('state_id')->nullable();
+            $table->integer('city_id')->nullable();
             $table->integer('zip_code')->nullable();
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();

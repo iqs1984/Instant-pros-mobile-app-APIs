@@ -36,8 +36,10 @@ class AuthController extends Controller
                 'category' => 'required|integer',
                 'business_logo' => ['required','image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
                 'business_name' => 'required',
-                'country' => 'required|integer',
-                'state' => 'required|integer',
+                'country_id' => 'required|integer',
+                'state_id' => 'required|integer',
+                'city_id' => 'required|integer',
+                'address' => 'required|string',
                 'zip_code' => 'required|integer',
                 
             ]);
