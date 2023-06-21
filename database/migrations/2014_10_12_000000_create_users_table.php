@@ -30,6 +30,7 @@ return new class extends Migration
             $table->integer('city_id')->nullable();
             $table->string('city_name')->nullable();
             $table->integer('zip_code')->nullable();
+            $table->string('chatUserId')->nullable();
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();

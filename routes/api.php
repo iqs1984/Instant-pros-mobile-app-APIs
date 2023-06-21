@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,9 +25,12 @@ Route::group(['middleware' => 'api', 'prefix' => 'auth'],function($router)
 {
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login']);
+    // Route::get('/user', [AuthController::class, 'getUser'])->middleware('auth.jwt');
+
     Route::get('/categories',[CategoryController::class,'getAllCategories']);
     Route::get('/countries',[AddressController::class,'getAllCountries']);
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
-    
+    Route::get('/userDetails',[UserController::class,'getUserDetails'])->middleware('auth.jwt');
+
 });
