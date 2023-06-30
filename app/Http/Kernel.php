@@ -66,6 +66,6 @@ class Kernel extends HttpKernel
     ];
 
     protected $routeMiddleware = [
-        'auth.jwt'=>\App\Http\Middleware\JwtMiddleWare::class,
+        'auth.jwt'=>\App\Http\Middleware\JWTMiddleWare::class,
     ];
 }
