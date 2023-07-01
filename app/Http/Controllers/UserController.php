@@ -32,7 +32,7 @@ class UserController extends Controller
         
         $getFcmTokenList =  UserFcmTokens::where('user_id',$user->id)->get();
 
-        if($getFcmTokenList){
+        if(count($getFcmTokenList) > 0){
             return response()->json(['user_fcm_token_list'=>$getFcmTokenList], 200);
         }else{
             return response()->json(['user_fcm_token_list'=>'No fcm token found'], 201);
