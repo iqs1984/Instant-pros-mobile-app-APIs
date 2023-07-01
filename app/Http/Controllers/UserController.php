@@ -43,9 +43,20 @@ class UserController extends Controller
     public function UpdateUserFcmTokens(Request $request)
     {
         $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'user_id'    => 'required',
+            'device_id'  => 'required|string',
+            'fcm_token'  => 'required|string',
+        ]);
 
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+       
         if($request->user_id == $user->id)
         {
+
             $user_fcm_list =  UserFcmTokens::where(['user_id' => $request->user_id, 'device_id' => $request->device_id])->first();
             if($user_fcm_list)
             {
