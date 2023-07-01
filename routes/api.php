@@ -17,20 +17,19 @@ use App\Http\Controllers\UserController;
 |
 */
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
-Route::group(['middleware' => 'api', 'prefix' => 'auth'],function($router)
+Route::group( ['middleware' => ['api'],'prefix' => 'auth'],function($router)
 {
     Route::post('/register',[AuthController::class,'register']);
     Route::post('/login',[AuthController::class,'login']);
-    // Route::get('/user', [AuthController::class, 'getUser'])->middleware('auth.jwt');
-
     Route::get('/categories',[CategoryController::class,'getAllCategories']);
     Route::get('/countries',[AddressController::class,'getAllCountries']);
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
-    Route::get('/userDetails',[UserController::class,'getUserDetails'])->middleware('auth.jwt');
 
+    Route::group( ['middleware' => 'auth.jwt'],function($router)
+    {
+        Route::get('/userDetails',[UserController::class,'getUserDetails']);
+        Route::get('/userFcmToken',[UserController::class,'getUserFcmTokens']);
+        Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
+    });
 });
