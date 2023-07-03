@@ -15,10 +15,10 @@ use App\Models\City;
 class AuthController extends Controller
 {
     public function _construct(){
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+        $this->middleware('auth:api', ['except' => ['login','signup']]);
     }
 
-    public function register(Request $request)
+    public function signup(Request $request)
     {
         $country_name = "";
         $state_name = "";

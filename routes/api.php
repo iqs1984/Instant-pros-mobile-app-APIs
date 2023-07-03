@@ -17,16 +17,16 @@ use App\Http\Controllers\UserController;
 |
 */
 
-Route::group( ['middleware' => ['api'],'prefix' => 'auth'],function($router)
+Route::group( ['middleware' => ['api']],function($router)
 {
-    Route::post('/register',[AuthController::class,'register']);
+    Route::post('/signup',[AuthController::class,'signup']);
     Route::post('/login',[AuthController::class,'login']);
     Route::get('/categories',[CategoryController::class,'getAllCategories']);
     Route::get('/countries',[AddressController::class,'getAllCountries']);
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
 
-    Route::group( ['middleware' => 'auth.jwt'],function($router)
+    Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
         Route::get('/userFcmToken',[UserController::class,'getUserFcmTokens']);
