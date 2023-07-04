@@ -31,5 +31,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
         Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
         Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
+        Route::post('/updateChatUserId',[UserController::class,'UpdateChatUserID']);
     });
 });

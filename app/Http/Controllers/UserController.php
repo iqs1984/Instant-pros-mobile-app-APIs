@@ -91,4 +91,27 @@ class UserController extends Controller
             return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
         }
     }
+
+    public function UpdateChatUserID(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'chatUserId'    => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+       
+        if($request->user_id == $user->id)
+        {
+            $user->chatUserId = $request->chatUserId;
+            $update_data = $user->save();
+            return response()->json(['success'=> 'ChatUserId updated successfully'], 200);
+        }else{
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+        }
+    }
 }
