@@ -37,16 +37,12 @@ class AuthController extends Controller
     
         }else if($request->role == 'vendor'){
 
-            $country_name = Country::find($request->country_id)->first('country_name');
-            $state_name = State::find($request->state_id)->first('state_name');
-            $city_name = City::find($request->city_id)->first('city_name');
-
             $validator = Validator::make($request->all(), [
                 'role'          => 'required|string',
                 'email'         => 'required|string|email|unique:users',
                 'password'      => 'required|string|confirmed|min:6',
                 'category'      => 'required|integer',
-                'business_name' => 'required',
+                'business_name' => 'required|string',
                 'country_id'    => 'required|integer',
                 'state_id'      => 'required|integer',
                 'city_id'       => 'required|integer',
@@ -72,6 +68,10 @@ class AuthController extends Controller
                 ['password' => bcrypt($request->password)]
             ));
         }else{
+            $country_name = Country::find($request->country_id);
+            $state_name = State::find($request->state_id);
+            $city_name = City::find($request->city_id);
+
             $user = User::create(array_merge(
                 $validator->validated(),
                 [   'country_name'  => $country_name['country_name'],
