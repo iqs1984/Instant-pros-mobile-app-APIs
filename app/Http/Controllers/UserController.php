@@ -29,13 +29,27 @@ class UserController extends Controller
     public function getUserFcmTokens(Request $request)
     {
         $user = auth()->user();
-        
-        $getFcmTokenList =  UserFcmTokens::where('user_id',$user->id)->get();
 
-        if(count($getFcmTokenList) > 0){
-            return response()->json(['user_fcm_token_list'=>$getFcmTokenList], 200);
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+        if($request->user_id == $user->id)
+        {
+            $getFcmTokenList = UserFcmTokens::where('user_id',$user->id)->get();
+
+            if(count($getFcmTokenList) > 0){
+                return response()->json(['user_fcm_token_list'=>$getFcmTokenList], 200);
+            }else{
+                return response()->json(['user_fcm_token_list'=>'No fcm token found'], 201);
+            }
+
         }else{
-            return response()->json(['user_fcm_token_list'=>'No fcm token found'], 201);
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
         }
     }
 

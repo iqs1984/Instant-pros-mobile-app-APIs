@@ -29,7 +29,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
-        Route::get('/userFcmToken',[UserController::class,'getUserFcmTokens']);
+        Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
         Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
     });
 });
