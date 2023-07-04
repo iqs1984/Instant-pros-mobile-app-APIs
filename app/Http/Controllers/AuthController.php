@@ -43,6 +43,7 @@ class AuthController extends Controller
                 'password'      => 'required|string|confirmed|min:6',
                 'category'      => 'required|integer',
                 'business_name' => 'required|string',
+                'phone'         => 'required|string',
                 'country_id'    => 'required|integer',
                 'state_id'      => 'required|integer',
                 'city_id'       => 'required|integer',
