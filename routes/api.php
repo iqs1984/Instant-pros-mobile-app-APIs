@@ -26,6 +26,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
+    Route::post('/getVendorServices',[UserController::class,'getVendorServices']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {

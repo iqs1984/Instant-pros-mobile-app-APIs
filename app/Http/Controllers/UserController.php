@@ -193,4 +193,24 @@ class UserController extends Controller
             return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
         }
     }
+
+    public function getVendorServices(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $allServices = VendorServices::where(['user_id' => $request->user_id])->get();
+        
+        if(count($allServices) > 0){
+            return response()->json(['data'=> $allServices], 200);
+        }else{
+            return response()->json(['error'=> 'No services found'], 200);
+        }
+    }
 }
