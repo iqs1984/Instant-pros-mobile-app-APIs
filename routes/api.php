@@ -25,12 +25,15 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/countries',[AddressController::class,'getAllCountries']);
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
+    Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
-        Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
         Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
         Route::post('/updateChatUserId',[UserController::class,'UpdateChatUserID']);
+        Route::post('/addService',[UserController::class,'addService']);
+        Route::post('/updateService',[UserController::class,'updateService']);
+        Route::post('/deleteService',[UserController::class,'deleteService']);
     });
 });

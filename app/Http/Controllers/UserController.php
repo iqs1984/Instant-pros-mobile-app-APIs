@@ -8,6 +8,7 @@ use Auth;
 use Validator;
 use App\Models\User;
 use App\Models\UserFcmTokens;
+use App\Models\VendorServices;
 
 class UserController extends Controller
 {
@@ -28,8 +29,6 @@ class UserController extends Controller
 
     public function getUserFcmTokens(Request $request)
     {
-        $user = auth()->user();
-
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
         ]);
@@ -38,18 +37,13 @@ class UserController extends Controller
         {
             return $validator->messages()->toJson();
         }
-        if($request->user_id == $user->id)
-        {
-            $getFcmTokenList = UserFcmTokens::where('user_id',$user->id)->get();
 
-            if(count($getFcmTokenList) > 0){
-                return response()->json(['user_fcm_token_list'=>$getFcmTokenList], 200);
-            }else{
-                return response()->json(['user_fcm_token_list'=>'No fcm token found'], 201);
-            }
+        $getFcmTokenList = UserFcmTokens::where('user_id',$request->user_id)->get();
 
+        if(count($getFcmTokenList) > 0){
+            return response()->json(['user_fcm_token_list'=>$getFcmTokenList], 200);
         }else{
-            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+            return response()->json(['user_fcm_token_list'=>'No fcm token found'], 201);
         }
     }
 
@@ -110,6 +104,91 @@ class UserController extends Controller
             $user->chatUserId = $request->chatUserId;
             $update_data = $user->save();
             return response()->json(['success'=> 'ChatUserId updated successfully'], 200);
+        }else{
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+        }
+    }
+
+    public function addService(Request $request)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+            'title'    => 'required|string',
+            'price'    => 'required|string',
+            'duration' => 'required|string',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($request->user_id == $user->id)
+        {
+            $service = VendorServices::create($validator->validated());
+
+            return response()->json(['success'=> 'Service added successfully',
+                                      'data' => $service], 200);
+        }else{
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+        }
+    }
+
+    public function updateService(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'service_id'  => 'required',
+            'title'       => 'required|string',
+            'price'       => 'required|string',
+            'duration'    => 'required|string',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $service = VendorServices::where(['user_id' => $user->id ,'id' => $request->service_id])->first();
+
+        if($service){
+            $service->title    = $request->title;
+            $service->price    = $request->price;
+            $service->duration = $request->duration;
+            $service->save();
+            if($service == true){
+                return response()->json(['success'=> 'Service updated successfully'], 200);
+            }else{
+                return response()->json(['error'=> 'Something went wrong!'], 200);
+            }
+        }else{
+            return response()->json(['error'=>'given service_id does not belong to login user'], 201);
+        }
+    }
+
+    public function deleteService(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+            'service_id'  => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($request->user_id == $user->id){
+
+            $deleteService = VendorServices::where(['user_id' => $user->id ,'id' => $request->service_id])->delete();
+            if($deleteService == true){
+                return response()->json(['success'=> 'Service deleted successfully'], 200);
+            }else{
+                return response()->json(['error'=> 'Something went wrong!'], 200);
+            }
         }else{
             return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
         }
