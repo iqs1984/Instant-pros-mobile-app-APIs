@@ -26,7 +26,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
-    Route::post('/getVendorServices',[UserController::class,'getVendorServices']);
+    Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
+    Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
@@ -36,5 +37,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/addService',[UserController::class,'addService']);
         Route::post('/updateService',[UserController::class,'updateService']);
         Route::post('/deleteService',[UserController::class,'deleteService']);
+        Route::post('/addVendorAbout',[UserController::class,'addVendorAbout']);
     });
 });

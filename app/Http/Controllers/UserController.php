@@ -9,6 +9,7 @@ use Validator;
 use App\Models\User;
 use App\Models\UserFcmTokens;
 use App\Models\VendorServices;
+use App\Models\VendorAboutData;
 
 class UserController extends Controller
 {
@@ -211,6 +212,57 @@ class UserController extends Controller
             return response()->json(['data'=> $allServices], 200);
         }else{
             return response()->json(['error'=> 'No services found'], 200);
+        }
+    }
+
+    public function addVendorAbout(Request $request)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+            'description' => 'required|string'
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($request->user_id == $user->id)
+        {
+            $aboutData = VendorAboutData::where(['user_id' => $user->id])->first();
+            if($aboutData){
+                
+                $aboutData->description = $request->description;
+                $aboutData->save();
+                return response()->json(['success'=> 'About updated successfully'], 200);
+            }else{
+                $aboutData = VendorAboutData::create($validator->validated());
+                return response()->json(['success'=> 'About Added successfully',
+                                         'data' => $aboutData], 200);
+            }
+        }else{
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+        }
+    }
+
+    public function getVendorAbout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $aboutData = VendorAboutData::where(['user_id' => $request->user_id])->first();
+        if($aboutData){
+            return response()->json(['data'  => $aboutData], 200);
+        }else{
+            return response()->json(['error'=> 'No text found'], 200);
         }
     }
 }
