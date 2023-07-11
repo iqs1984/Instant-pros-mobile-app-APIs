@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 use Auth;
 use Validator;
@@ -10,6 +11,7 @@ use App\Models\User;
 use App\Models\UserFcmTokens;
 use App\Models\VendorServices;
 use App\Models\VendorAboutData;
+use App\Models\VendorGalleryImages;
 
 class UserController extends Controller
 {
@@ -263,6 +265,88 @@ class UserController extends Controller
             return response()->json(['data'  => $aboutData], 200);
         }else{
             return response()->json(['error'=> 'No text found'], 200);
+        }
+    }
+
+    public function uploadGalleryImage(Request $request)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'images' => 'required|array',
+            'images.*' => 'image|max:2048',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $uploadedImages = [];
+
+        if ($request->hasFile('images')) {
+            $images = $request->file('images');
+
+            foreach ($images as $image) {
+                $fileName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('uploads'), $fileName);
+
+                $imageModel = new VendorGalleryImages();
+                $imageModel->user_id = $user->id;
+                $imageModel->image_name = $fileName;
+                $imageModel->image_path = '/uploads/' . $fileName;
+                $imageModel->save();
+
+                $uploadedImages[] = $imageModel->image_path;
+            }
+            return response()->json(['message' => 'Images uploaded successfully', 'uploaded_images' => $uploadedImages]);
+        }
+        return response()->json(['message' => 'No image files found'], 400);
+    }
+
+    public function getGalleryImages(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $images = VendorGalleryImages::where('user_id', $request->user_id)->get();
+        if(count($images) > 0){
+            foreach($images as $image)
+            {
+                $getImagesPath[] = ['item_id' => $image->id, 'image_path' => url('/').$image->image_path];
+            }
+            return response()->json(['Gallery_images' => $getImagesPath]);
+        }else{
+            return response()->json(['message' => 'No Image found']);
+        }
+    }
+
+    public function deleteGalleryImage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'item_id' => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $image = VendorGalleryImages::where(['user_id' => $request->user_id,'id' => $request->item_id])->first();
+
+        if (File::exists(public_path($image['image_path']))) {
+            File::delete(public_path($image['image_path']));
+            $image->delete();
+            return response()->json(['message' => 'Image deleted successfully']);
+        }else{
+            return response()->json(['message' => 'No Image found']);
         }
     }
 }

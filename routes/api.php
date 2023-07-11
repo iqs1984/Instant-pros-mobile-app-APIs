@@ -28,6 +28,9 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
     Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
     Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
+    Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
+    Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
+    Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
