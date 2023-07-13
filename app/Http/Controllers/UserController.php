@@ -12,6 +12,11 @@ use App\Models\UserFcmTokens;
 use App\Models\VendorServices;
 use App\Models\VendorAboutData;
 use App\Models\VendorGalleryImages;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
+use App\Models\Category;
+
 
 class UserController extends Controller
 {
@@ -24,10 +29,77 @@ class UserController extends Controller
 
             return response()->json(['user'=>$user], 201);
         }else{
-            $vendor = auth('api')->user()->only(['id', 'business_name', 'email','role', 'category','business_logo','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','created_at','updated_at']);
+            $vendor = auth('api')->user()->only(['id', 'business_name', 'email','role', 'category_id','category_name','business_logo','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','created_at','updated_at']);
 
             return response()->json(['user'=>$vendor], 201);
         }
+    }
+
+    public function UpdateUserDetails(Request $request)
+    {
+        $user = auth()->user();
+
+        $country_name = "";
+        $state_name = "";
+        $city_name = "";
+
+        if($user->role == 'user'){
+
+            $validator = Validator::make($request->all(), [
+                'email'      => 'required|email|unique:users,email,'.$user->id.'id',
+                'name'       => 'required|string',
+                'phone'      => 'required|string|unique:users,phone,'.$user->id.'phone',  
+                'address'    => 'required|string',
+            ]);
+    
+        }else if($user->role == 'vendor'){
+
+            $validator = Validator::make($request->all(), [
+                'email'         => 'required|email|unique:users,email,'.$user->id.'id',
+                'business_name' => 'required|string',
+                'category_id'   => 'required|string',
+                'address'       => 'required|string',
+                'country_id'    => 'required|integer',
+                'state_id'      => 'required|integer',
+                'city_id'       => 'required|integer',
+                'zip_code'      => 'required|integer',
+                'phone'         => 'required|string|unique:users,phone,'.$user->id.'phone',          
+            ]);
+        }
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($user->role == 'user')
+        {
+            $user->email = $request->email;
+            $user->name = $request->name;
+            $user->phone = $request->phone;
+            $user->address = $request->address;
+            $user->save();
+
+        }else{
+
+            $country_name = Country::find($request->country_id);
+            $state_name = State::find($request->state_id);
+            $city_name = City::find($request->city_id);
+            $category = Category::find($request->category_id);
+
+            $user->email = $request->email;
+            $user->business_name = $request->business_name;
+            $user->category_id = $request->category_id;
+            $user->category_name = $category['category_name'];
+            $user->address = $request->address;
+            $user->country_id = $request->country_id;
+            $user->state_id = $request->state_id;
+            $user->city_id = $request->city_id;
+            $user->zip_code = $request->zip_code;
+            $user->phone = $request->phone;
+            $user->save();
+        }
+        return response()->json(['message' => ucwords($user->role).' Updated Successfully'],200);
     }
 
     public function getUserFcmTokens(Request $request)

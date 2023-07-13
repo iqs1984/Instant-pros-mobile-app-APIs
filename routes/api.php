@@ -41,5 +41,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/updateService',[UserController::class,'updateService']);
         Route::post('/deleteService',[UserController::class,'deleteService']);
         Route::post('/addVendorAbout',[UserController::class,'addVendorAbout']);
+        Route::post('/UpdateUserDetails',[UserController::class,'UpdateUserDetails']);
     });
 });

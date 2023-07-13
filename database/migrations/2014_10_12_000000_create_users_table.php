@@ -18,7 +18,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->enum('role',['user','vendor']);
-            $table->integer('category')->nullable();
+            $table->integer('category_id')->nullable();
+            $table->string('category_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('profile_pic')->nullable();
             $table->string('business_logo')->nullable();

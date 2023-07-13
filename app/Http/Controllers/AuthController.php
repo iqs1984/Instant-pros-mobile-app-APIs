@@ -8,6 +8,7 @@ use Tymon\JWTAuth\Exceptions\JWTException;
 use Auth;
 use Validator;
 use App\Models\User;
+use App\Models\Category;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
@@ -41,7 +42,7 @@ class AuthController extends Controller
                 'role'          => 'required|string',
                 'email'         => 'required|string|email|unique:users',
                 'password'      => 'required|string|confirmed|min:6',
-                'category'      => 'required|integer',
+                'category_id'   => 'required|integer',
                 'business_name' => 'required|string',
                 'phone'         => 'required|string',
                 'country_id'    => 'required|integer',
@@ -69,15 +70,17 @@ class AuthController extends Controller
                 ['password' => bcrypt($request->password)]
             ));
         }else{
-            $country_name = Country::find($request->country_id);
-            $state_name = State::find($request->state_id);
-            $city_name = City::find($request->city_id);
+            $category  = Category::find($request->category_id);
+            $country_name   = Country::find($request->country_id);
+            $state_name     = State::find($request->state_id);
+            $city_name      = City::find($request->city_id);
 
             $user = User::create(array_merge(
                 $validator->validated(),
                 [   'country_name'  => $country_name['country_name'],
                     'state_name'    => $state_name['state_name'],
                     'city_name'     => $city_name['city_name'],
+                    'category_name' => $category['category_name'],
                     'password'      => bcrypt($request->password)]
             ));
         }
