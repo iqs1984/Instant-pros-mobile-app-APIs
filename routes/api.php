@@ -31,6 +31,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
     Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
+    Route::post('/updateBLogo',[UserController::class,'updateBLogo']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {

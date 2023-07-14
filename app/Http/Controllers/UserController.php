@@ -421,4 +421,35 @@ class UserController extends Controller
             return response()->json(['message' => 'No Image found']);
         }
     }
+
+    public function updateBLogo(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'bLogo' => 'mimes:jpeg,jpg,png',
+            'bLogo' => 'image|max:2048',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if ($request->hasFile('bLogo')) {
+            $bLogo = $request->file('bLogo');
+            $fileName = time() . '_' . $bLogo->getClientOriginalName();
+            $bLogo->move(public_path('uploads'), $fileName);
+            
+            if (File::exists(public_path($user['business_logo']))) {
+                File::delete(public_path($user['business_logo']));
+            }
+
+            $user->business_logo = '/uploads/' . $fileName;
+            $user->save();
+
+            return response()->json(['message' => 'Business Logo uploaded successfully']);
+        }else{
+            return response()->json(['message' => 'No Image found']);
+        }
+    }
 }
