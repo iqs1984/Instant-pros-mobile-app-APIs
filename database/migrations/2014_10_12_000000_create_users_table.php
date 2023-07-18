@@ -21,8 +21,7 @@ return new class extends Migration
             $table->integer('category_id')->nullable();
             $table->string('category_name')->nullable();
             $table->string('phone')->nullable();
-            $table->string('profile_pic')->nullable();
-            $table->string('business_logo')->nullable();
+            $table->string('profile_image')->nullable();
             $table->string('address')->nullable();
             $table->integer('country_id')->nullable();
             $table->string('country_name')->nullable();
@@ -32,6 +31,7 @@ return new class extends Migration
             $table->string('city_name')->nullable();
             $table->integer('zip_code')->nullable();
             $table->string('chatUserId')->nullable();
+            $table->enum('is_published',['0','1'])->default('0');
             $table->rememberToken();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();

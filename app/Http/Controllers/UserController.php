@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-
+use App\Rules\StripeKeyValidator;
 use Auth;
 use Validator;
 use App\Models\User;
@@ -16,6 +16,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use App\Models\Category;
+use App\Models\StripeAccountDetails;
 
 
 class UserController extends Controller
@@ -25,11 +26,11 @@ class UserController extends Controller
         $allUserDetails = auth('api')->user();
 
         if($allUserDetails->role == 'user'){
-            $user = auth('api')->user()->only(['id', 'name', 'email', 'role','phone','address','chatUserId','created_at','updated_at']);
+            $user = auth('api')->user()->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId','created_at','updated_at']);
 
             return response()->json(['user'=>$user], 201);
         }else{
-            $vendor = auth('api')->user()->only(['id', 'business_name', 'email','role', 'category_id','category_name','business_logo','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','created_at','updated_at']);
+            $vendor = auth('api')->user()->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published','created_at','updated_at']);
 
             return response()->json(['user'=>$vendor], 201);
         }
@@ -422,12 +423,12 @@ class UserController extends Controller
         }
     }
 
-    public function updateBLogo(Request $request)
+    public function updateProfileImage(Request $request)
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
-            'bLogo' => 'mimes:jpeg,jpg,png',
-            'bLogo' => 'image|max:2048',
+            'profile_image' => 'mimes:jpeg,jpg,png',
+            'profile_image' => 'image|max:2048',
         ]);
 
         if($validator->fails())
@@ -435,21 +436,96 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if ($request->hasFile('bLogo')) {
-            $bLogo = $request->file('bLogo');
-            $fileName = time() . '_' . $bLogo->getClientOriginalName();
-            $bLogo->move(public_path('uploads'), $fileName);
+        if ($request->hasFile('profile_image')) {
+            $profileImage = $request->file('profile_image');
+            $fileName = time() . '_' . $profileImage->getClientOriginalName();
+            $profileImage->move(public_path('uploads'), $fileName);
             
-            if (File::exists(public_path($user['business_logo']))) {
-                File::delete(public_path($user['business_logo']));
+            if (File::exists(public_path($user['profile_image']))) {
+                File::delete(public_path($user['profile_image']));
             }
 
-            $user->business_logo = '/uploads/' . $fileName;
+            $user->profile_image = '/uploads/' . $fileName;
             $user->save();
 
-            return response()->json(['message' => 'Business Logo uploaded successfully']);
+            return response()->json(['message' => 'Profile Image uploaded successfully']);
         }else{
             return response()->json(['message' => 'No Image found']);
+        }
+    }
+
+    public function addStripeAccount(Request $request)
+    {
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'publishable_key' => ['required', new StripeKeyValidator],
+            'secret_key' => ['required', new StripeKeyValidator],
+            'user_id' =>'required'
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($request->user_id == $user->id)
+        {
+            $StripeAccDetails = StripeAccountDetails::where('user_id',$request->user_id)->first();
+
+            if($StripeAccDetails){
+                
+                $StripeAccDetails->publishable_key = $request->publishable_key;
+                $StripeAccDetails->secret_key = $request->secret_key;
+                $StripeAccDetails->user_id = $request->user_id;
+                $StripeAccDetails->save();
+
+                return response()->json(['success'=> 'Stripe Account Details updated successfully'],200);
+
+            }else{
+                $StripeAccDetails = StripeAccountDetails::create(array_merge(
+                    $validator->validated(),
+                    ['user_id'  => $user->id]
+                ));
+            }
+        
+            return response()->json(['success'=> 'Stripe Account Details save successfully',
+                                      'data' => $StripeAccDetails], 200);
+        }else{
+            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+        }
+    }
+
+    public function getStripeAccount(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $StripeAccount = StripeAccountDetails::where(['user_id' => $request->user_id])->get();
+        
+        if(count($StripeAccount) > 0){
+            return response()->json(['success'=>true,'message'=>'Stripe Account Details','data'=> $StripeAccount], 200);
+        }else{
+            return response()->json(['success'=>false,'message'=> 'No Stripe Account found'], 201);
+        }
+    }
+
+    public function setPublishedStatus(Request $request)
+    {
+        $user = auth()->user();
+
+        $user->is_published = '1';
+        $status = $user->save();
+        if($status){
+            return response()->json(['success'=>true,'message'=>'Vendor Published Successfully'], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' => 'something went worng! try again'], 201);
         }
     }
 }

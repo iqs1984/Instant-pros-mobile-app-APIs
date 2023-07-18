@@ -31,7 +31,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
     Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
-    Route::post('/updateBLogo',[UserController::class,'updateBLogo']);
+    Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
+    Route::post('/getStripeAccount',[UserController::class,'getStripeAccount']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
@@ -43,5 +44,8 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/deleteService',[UserController::class,'deleteService']);
         Route::post('/addVendorAbout',[UserController::class,'addVendorAbout']);
         Route::post('/UpdateUserDetails',[UserController::class,'UpdateUserDetails']);
+        Route::post('/changePassword',[AuthController::class,'changePassword']);
+        Route::post('/addStripeAccount',[UserController::class,'addStripeAccount']);
+        Route::post('/setPublishedStatus',[UserController::class,'setPublishedStatus']);
     });
 });

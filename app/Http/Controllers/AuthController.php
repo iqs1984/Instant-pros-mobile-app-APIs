@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Illuminate\Support\Facades\Hash;
 use Auth;
 use Validator;
 use App\Models\User;
@@ -119,4 +120,54 @@ class AuthController extends Controller
         ], 200);
     }
 
+
+    public function changePassword(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required|string|min:6',
+            'password'     => 'required|string|confirmed|min:6',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if (!Hash::check($request->input('old_password'), $user->password)) {
+            return response()->json(['error' => 'Old password does not matched'], 401);
+        }
+
+        $user->password = bcrypt($request->password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully']);
+    }
+
+
+    // public function forgotPassword(){
+
+    //     $validator = Validator::make($request->all(), [
+    //         'email' => 'required|email'
+    //     ]);
+
+    //     if($validator->fails())
+    //     {
+    //         return $validator->messages()->toJson();
+    //     }
+
+    //     $check_email = User::where('email',$request->email);
+
+    //     if(count($check_email) > 0){
+
+
+    //     }else{
+    //         return response()->json(['message' => 'No user found!']);
+    //     }
+
+
+
+
+    // }
 }
