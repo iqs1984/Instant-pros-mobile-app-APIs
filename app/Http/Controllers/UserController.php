@@ -17,6 +17,7 @@ use App\Models\State;
 use App\Models\City;
 use App\Models\Category;
 use App\Models\StripeAccountDetails;
+use App\Models\DocumentText;
 
 
 class UserController extends Controller
@@ -526,6 +527,26 @@ class UserController extends Controller
             return response()->json(['success'=>true,'message'=>'Vendor Published Successfully'], 200);
         }else{
             return response()->json(['success'=> false, 'message' => 'something went worng! try again'], 201);
+        }
+    }
+
+    public function getDocument(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'doc_name'  => 'required|string',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $document = DocumentText::where(['doc_name' => $request->doc_name])->first();
+
+        if($document){
+            return response()->json(['success'=> true, 'data' => $document->content ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' => 'Please enter correct document name / Document not found!' ], 200);
         }
     }
 }

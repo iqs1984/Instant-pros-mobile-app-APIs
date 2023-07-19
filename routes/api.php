@@ -33,6 +33,9 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
     Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
     Route::post('/getStripeAccount',[UserController::class,'getStripeAccount']);
+    Route::post('/forgotPasswordMail',[AuthController::class,'forgotPasswordMail']);
+    Route::post('/resetPassword',[AuthController::class,'resetPassword']);
+    Route::post('/getDocument',[UserController::class,'getDocument']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {

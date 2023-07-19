@@ -7,12 +7,14 @@ use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Support\Facades\Hash;
 use Auth;
+use Mail;
 use Validator;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
+use App\Models\PasswordRest;
 
 class AuthController extends Controller
 {
@@ -146,28 +148,71 @@ class AuthController extends Controller
     }
 
 
-    // public function forgotPassword(){
+    public function forgotPasswordMail(Request $request){
 
-    //     $validator = Validator::make($request->all(), [
-    //         'email' => 'required|email'
-    //     ]);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email'
+        ]);
 
-    //     if($validator->fails())
-    //     {
-    //         return $validator->messages()->toJson();
-    //     }
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
-    //     $check_email = User::where('email',$request->email);
+        $check_email = User::where('email',$request->email)->first();
 
-    //     if(count($check_email) > 0){
+        if($check_email){
 
+            $username = $check_email->role == 'user' ? $check_email->name : $check_email->business_name;
+            $secret_code = substr(number_format(time() * rand(),0,'',''),0,8);
 
-    //     }else{
-    //         return response()->json(['message' => 'No user found!']);
-    //     }
+            $password_reset_data = PasswordRest::where('email',$request->email)->first();
 
+            if($password_reset_data){
+                $password_reset_data->token = $secret_code;
+                $password_reset_data->save();
+            }else{
+                PasswordRest::create(['email' => $request->email, 'token' => $secret_code]);
 
+            }
 
+            $user['to'] = 'ntnshakya.work@gmail.com';
+            // $user['to'] = $check_email->email;
+            Mail::send('forgotPassword',['username' => $username, 'secret_code' => $secret_code], function ($message) use ($user) {
+                $message->to($user['to']);
+                $message->subject("Forgot Password");
+            });
+            return response()->json(['message' => 'Mail sent successfully']);
 
-    // }
+        }else{
+            return response()->json(['message' => 'No user found!']);
+        }
+    }
+
+    public function resetPassword(Request $request)
+    {   
+        $validator = Validator::make($request->all(), [
+            'secret_code'   => 'required|string|min:6',
+            'password'      => 'required|string|confirmed|min:6',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $password_reset_data = PasswordRest::where('token',$request->secret_code)->first();
+        if($password_reset_data){
+            $email =  $password_reset_data->email;
+
+            $user = User::where('email',$email)->first();
+            $user->password = bcrypt($request->password);
+            $user->save();
+            $password_reset_data->delete();
+            
+            return response()->json(['message' => 'Password reset successfully']);
+        }else{
+            return response()->json(['message' => 'Please enter correct secret code']);
+        }
+    }
 }
