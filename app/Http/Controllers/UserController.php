@@ -18,6 +18,7 @@ use App\Models\City;
 use App\Models\Category;
 use App\Models\StripeAccountDetails;
 use App\Models\DocumentText;
+use App\Models\VendorReview;
 
 
 class UserController extends Controller
@@ -549,4 +550,70 @@ class UserController extends Controller
             return response()->json(['success'=> false, 'message' => 'Please enter correct document name / Document not found!' ], 200);
         }
     }
+
+    public function getVendorByCategoryId(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'category_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $category = Category::find($request->category_id);
+        if($category != null){
+            $users = $category->users()->where('is_published', '1')->get();
+
+            if(count($users) > 0){
+                return response()->json(['success'=> true, 'data' =>$users ], 200);
+            }else{
+                return response()->json(['success'=> false, 'message' =>'No User Found!' ], 200);
+            }
+        }else{
+            return response()->json(['success'=> false, 'message' =>'No Category Found!' ], 200);
+        }
+    }
+
+    public function getVendorReviews(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $reviews = VendorReview::where('vendor_id',$request->vendor_id)->get();
+
+        if(count($reviews) > 0){
+            return response()->json(['success'=> true, 'data' =>$reviews ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'No review Found!' ], 200);
+        }
+    }
+
+
+    // public function createReviews(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'vendor_id'  => 'required|integer',
+    //     ]);
+
+    //     if($validator->fails())
+    //     {
+    //         return $validator->messages()->toJson();
+    //     }
+
+    //     $reviews = VendorReview::where('vendor_id',$request->vendor_id)->get();
+
+    //     if(count($reviews) > 0){
+    //         return response()->json(['success'=> true, 'data' =>$reviews ], 200);
+    //     }else{
+    //         return response()->json(['success'=> false, 'message' =>'No review Found!' ], 200);
+    //     }
+    // }
 }

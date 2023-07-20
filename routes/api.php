@@ -36,6 +36,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/forgotPasswordMail',[AuthController::class,'forgotPasswordMail']);
     Route::post('/resetPassword',[AuthController::class,'resetPassword']);
     Route::post('/getDocument',[UserController::class,'getDocument']);
+    Route::post('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
+    Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
