@@ -202,8 +202,9 @@ class AuthController extends Controller
         }
 
         $password_reset_data = PasswordRest::where('token',$request->secret_code)->first();
+        
         if($password_reset_data){
-            $email =  $password_reset_data->email;
+            $email =  $password_reset_data['email'];
 
             $user = User::where('email',$email)->first();
             $user->password = bcrypt($request->password);
