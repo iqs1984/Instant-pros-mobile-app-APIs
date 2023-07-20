@@ -176,8 +176,7 @@ class AuthController extends Controller
 
             }
 
-            $user['to'] = 'ntnshakya.work@gmail.com';
-            // $user['to'] = $check_email->email;
+            $user['to'] = $check_email->email;
             Mail::send('forgotPassword',['username' => $username, 'secret_code' => $secret_code], function ($message) use ($user) {
                 $message->to($user['to']);
                 $message->subject("Forgot Password");
