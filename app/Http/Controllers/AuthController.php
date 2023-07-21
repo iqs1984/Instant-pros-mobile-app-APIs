@@ -88,11 +88,26 @@ class AuthController extends Controller
             ));
         }
 
+        $credentials = $request->only('email', 'password');
+
+        try {
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json([
+                    'error' => 'Invalid Credentials'
+                ], 401);
+            }
+        } catch (JWTException $e) {
+            return response()->json([
+                'error' => 'Could not create token'
+            ], 500);
+        }
         return response()->json([
             'message' => ucwords($request->role).' Successfully Register',
             'user' => $user,
+            'token' => $token,
+            'token_type' => 'bearer',
+            'expire_in' => JWTAuth::factory()->getTTL()*60,
         ],200);
-
     }
 
     public function login(Request $request)
