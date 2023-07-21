@@ -597,23 +597,37 @@ class UserController extends Controller
     }
 
 
-    // public function createReviews(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'vendor_id'  => 'required|integer',
-    //     ]);
+    public function createReviews(Request $request)
+    {
+        $user = auth()->user();
 
-    //     if($validator->fails())
-    //     {
-    //         return $validator->messages()->toJson();
-    //     }
+        $validator = Validator::make($request->all(), [
+            'vendor_id'  => 'required|integer',
+            'text'  => 'required|string',
+            'rating'  => 'required|integer|between:1,5',
+        ]);
 
-    //     $reviews = VendorReview::where('vendor_id',$request->vendor_id)->get();
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
-    //     if(count($reviews) > 0){
-    //         return response()->json(['success'=> true, 'data' =>$reviews ], 200);
-    //     }else{
-    //         return response()->json(['success'=> false, 'message' =>'No review Found!' ], 200);
-    //     }
-    // }
+        if($user->role == 'user')
+        {
+            $user_review = VendorReview::create(array_merge(
+                $validator->validated(),
+                [   'username'  => $user->name,
+                    'user_pic'  => $user->profile_image,
+                ]
+            ));
+    
+            if($user_review){
+                return response()->json(['success'=> true, 'data' =>$user_review ], 200);
+            }else{
+                return response()->json(['success'=> false, 'message' =>'Something went worng!' ], 200);
+            }
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Pass the user access token' ], 200);
+        }
+    }
 }

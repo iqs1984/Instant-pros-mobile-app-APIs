@@ -52,5 +52,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/changePassword',[AuthController::class,'changePassword']);
         Route::post('/addStripeAccount',[UserController::class,'addStripeAccount']);
         Route::post('/setPublishedStatus',[UserController::class,'setPublishedStatus']);
+        Route::post('/createReviews',[UserController::class,'createReviews']);
     });
 });
