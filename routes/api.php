@@ -38,6 +38,9 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getDocument',[UserController::class,'getDocument']);
     Route::post('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
     Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
+    Route::post('/deleteVendorSlot',[UserController::class,'deleteVendorSlot']);
+    Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
+
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
@@ -53,5 +56,9 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/addStripeAccount',[UserController::class,'addStripeAccount']);
         Route::post('/setPublishedStatus',[UserController::class,'setPublishedStatus']);
         Route::post('/createReviews',[UserController::class,'createReviews']);
+        Route::post('/addVendorSlot',[UserController::class,'addVendorSlot']);
+        
+
+        
     });
 });

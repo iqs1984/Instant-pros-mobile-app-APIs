@@ -19,6 +19,7 @@ use App\Models\Category;
 use App\Models\StripeAccountDetails;
 use App\Models\DocumentText;
 use App\Models\VendorReview;
+use App\Models\VendorSlot;
 
 
 class UserController extends Controller
@@ -628,6 +629,93 @@ class UserController extends Controller
             }
         }else{
             return response()->json(['success'=> false, 'message' =>'Pass the user access token' ], 200);
+        }
+    }
+
+    public function addVendorSlot(Request $request){
+
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'date'  => 'required|date_format:Y-m-d|after:yesterday',
+            'start_time'  => 'required|date_format:H:i',
+            'end_time'  => 'required|date_format:H:i|after:start_time',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($user->role == 'vendor')
+        {
+            $isSlotAvailable = VendorSlot::where(['vendor_id' => $user->id,'date' => $request->date,'start_time' => $request->start_time,'end_time' => $request->end_time ])->get();
+
+            if(count($isSlotAvailable) > 0){
+                return response()->json(['success'=> false, 'message' =>'Slot already exist'], 200);
+            }else{
+                $vendor_slot = VendorSlot::create(array_merge(
+                    $validator->validated(),
+                    ['vendor_id'  => $user->id]
+                ));
+
+                if($vendor_slot){
+                    return response()->json(['success'=> true, 'data' =>$vendor_slot ], 200);
+                }else{
+                    return response()->json(['success'=> false, 'message' =>'Something went worng!' ], 200);
+                }
+            }
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Pass the vendor access token' ], 200);
+        }
+    }
+
+    public function deleteVendorSlot(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id'  => 'required|integer',
+            'slot_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $deleteSlot = VendorSlot::where(['vendor_id' => $request->vendor_id,'id' => $request->slot_id])->delete();
+
+        if($deleteSlot == true){
+            return response()->json(['success'=> true, 'message' =>'slot delete successfully' ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'slot not found!' ], 200);
+        }
+    }
+
+    public function getVendorSlot(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id'  => 'required|integer',
+            'date'  => 'required|date_format:Y-m-d|after:yesterday',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+        
+        $vendorExist = VendorSlot::where(['vendor_id' => $request->vendor_id])->get();
+
+        if(count($vendorExist) > 0){
+
+            $slotOnDate = VendorSlot::where(['vendor_id' => $request->vendor_id, 'date' => $request->date])->get();
+           
+            if(count($slotOnDate) > 0){
+                return response()->json(['success'=> true, 'data' => $slotOnDate ], 200);
+            }else{
+                return response()->json(['success'=> true, 'message' =>'No slot on this date' ], 200);
+            }
+        }else{
+            return response()->json(['success'=> true, 'message' =>'No slot found for this vendor id' ], 200);
         }
     }
 }
