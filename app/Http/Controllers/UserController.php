@@ -190,10 +190,10 @@ class UserController extends Controller
 
     public function addService(Request $request)
     {
-        $user = auth()->user();
+        $vendor = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
             'title'    => 'required|string',
             'price'    => 'required|string',
             'duration' => 'required|string',
@@ -204,14 +204,14 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if($request->user_id == $user->id)
+        if($request->vendor_id == $vendor->id)
         {
             $service = VendorServices::create($validator->validated());
 
             return response()->json(['success'=> 'Service added successfully',
                                       'data' => $service], 200);
         }else{
-            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+            return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
         }
     }
 
@@ -554,8 +554,10 @@ class UserController extends Controller
 
     public function getVendorByCategoryId(Request $request)
     {
+        $perPage = 3;
         $validator = Validator::make($request->all(), [
             'category_id'  => 'required|integer',
+            'page' => 'required|integer'
         ]);
 
         if($validator->fails())
@@ -565,7 +567,7 @@ class UserController extends Controller
 
         $category = Category::find($request->category_id);
         if($category != null){
-            $users = $category->users()->where('is_published', '1')->get();
+            $users = $category->users()->where('is_published', '1')->paginate($perPage);
 
             if(count($users) > 0){
                 return response()->json(['success'=> true, 'data' =>$users ], 200);

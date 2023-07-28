@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('vendor_services', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('vendor_id');
             $table->string('title');
             $table->string('price');
             $table->string('duration');
             $table->string('status')->default('1');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

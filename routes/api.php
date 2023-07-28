@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -40,6 +41,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
     Route::post('/deleteVendorSlot',[UserController::class,'deleteVendorSlot']);
     Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
+    Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
+    Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
 
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
@@ -57,8 +60,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/setPublishedStatus',[UserController::class,'setPublishedStatus']);
         Route::post('/createReviews',[UserController::class,'createReviews']);
         Route::post('/addVendorSlot',[UserController::class,'addVendorSlot']);
-        
-
-        
+        Route::post('/createOrder',[OrderController::class,'createOrder']);
     });
 });
