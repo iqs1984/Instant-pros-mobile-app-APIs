@@ -43,6 +43,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
+    Route::post('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
 
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)

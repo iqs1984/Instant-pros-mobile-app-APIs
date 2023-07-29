@@ -140,31 +140,59 @@ class OrderController extends Controller
         }
     }
 
-    // public function updateOrderPaymentID(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'order_id'  => 'required|integer',
-    //         'payment_id'  => 'required',
-    //     ]);
+    public function getOrderByStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_status' => 'required|string|in:upcoming,cancelled,completed'
+        ]);
 
-    //     if($validator->fails())
-    //     {
-    //         return $validator->messages()->toJson();
-    //     }
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
-    //     $orderDetails = Order::where('id',$request->order_id)->first();
 
-    //     if($orderDetails){
+        if($request->order_status == 'upcoming'){
+            $orderStatus = '1';
+        }elseif($request->order_status == 'cancelled'){
+            $orderStatus = '3';
+        }elseif($request->order_status == 'completed'){
+            $orderStatus = '6';
+        }
 
-    //         $orderDetails->payment_id = $request->payment_id;
-    //         $success = $orderDetails->save();
-    //         if($success){
-    //             return response()->json(['success'=> true, 'message' => 'Payment id successfully updated' ], 200);
-    //         }else{
-    //             return response()->json(['success'=> false, 'message' =>'something went wrong!' ], 200);
-    //         }
-    //     }else{
-    //         return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
-    //     }
-    // }
+        $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('order_status', $orderStatus)->get();
+
+        if($orderDetails)
+        {
+            $jsonData = array();
+
+            foreach($orderDetails as $data) 
+            {
+                $order = [
+                    'order_id' => $data->id,
+                    'user_id' => $data->user_id,
+                    'vendor_id' => $data->vendor_id,
+                    'service_id' => $data->service_id,
+                    'slot_id' => $data->slot_id,
+                    'amount' => $data->amount,
+                    'address' => $data->address,
+                    'payment_id' => $data->payment_id,
+                    'order_status' => $data->order_status,
+                    'created_at' => date($data->created_at),
+                    'updated_at' => date($data->updated_at),
+                ];
+    
+                $user = $data->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId']);
+                $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
+                $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','status']);
+                $slot = $data->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
+
+                $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot];
+            }
+            return response()->json(['success'=> true,'data' =>$jsonData], 200);
+
+        }else {
+            return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
+        }
+    }
 }
