@@ -197,6 +197,8 @@ class UserController extends Controller
             'title'    => 'required|string',
             'price'    => 'required|string',
             'duration' => 'required|string',
+            'image' => 'mimes:jpeg,jpg,png',
+            'image' => 'required|image|max:2048',
         ]);
 
         if($validator->fails())
@@ -206,8 +208,17 @@ class UserController extends Controller
 
         if($request->vendor_id == $vendor->id)
         {
-            $service = VendorServices::create($validator->validated());
+            if($request->hasFile('image'))
+            {
+                $serviceImage = $request->file('image');
+                $fileName = time() . '_' . $serviceImage->getClientOriginalName();
+                $serviceImage->move(public_path('uploads'), $fileName);
+                
+                $service = VendorServices::create(array_merge($validator->validated(),['image' => '/uploads/' . $fileName ]));
 
+            }else{
+                $service = VendorServices::create($validator->validated());
+            }
             return response()->json(['success'=> 'Service added successfully',
                                       'data' => $service], 200);
         }else{
@@ -217,12 +228,13 @@ class UserController extends Controller
 
     public function updateService(Request $request)
     {
-        $user = auth()->user();
         $validator = Validator::make($request->all(), [
             'service_id'  => 'required',
             'title'       => 'required|string',
             'price'       => 'required|string',
             'duration'    => 'required|string',
+            'image'       => 'mimes:jpeg,jpg,png',
+            'image'       => 'image|max:2048',
         ]);
 
         if($validator->fails())
@@ -230,28 +242,47 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $service = VendorServices::where(['user_id' => $user->id ,'id' => $request->service_id])->first();
+        $service = VendorServices::where(['id' => $request->service_id])->first();
 
-        if($service){
-            $service->title    = $request->title;
-            $service->price    = $request->price;
-            $service->duration = $request->duration;
-            $service->save();
+        if($service)
+        {
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $fileName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('uploads'), $fileName);
+                
+                if (File::exists(public_path($service['image']))) {
+                    File::delete(public_path($service['image']));
+                }
+
+                $service->title    = $request->title;
+                $service->price    = $request->price;
+                $service->duration = $request->duration;
+                $service->image = '/uploads/' . $fileName;
+                $service->save();
+    
+            }else{
+                $service->title    = $request->title;
+                $service->price    = $request->price;
+                $service->duration = $request->duration;
+                $service->save();
+            }
+
             if($service == true){
                 return response()->json(['success'=> 'Service updated successfully'], 200);
             }else{
                 return response()->json(['error'=> 'Something went wrong!'], 200);
             }
         }else{
-            return response()->json(['error'=>'given service_id does not belong to login user'], 201);
+            return response()->json(['message'=>'service not found!'], 201);
         }
     }
 
     public function deleteService(Request $request)
     {
-        $user = auth()->user();
+        $vendor = auth()->user();
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
             'service_id'  => 'required',
         ]);
 
@@ -260,23 +291,25 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if($request->user_id == $user->id){
+        if($request->vendor_id == $vendor->id){
 
-            $deleteService = VendorServices::where(['user_id' => $user->id ,'id' => $request->service_id])->delete();
+            $deleteService = VendorServices::where(['vendor_id' => $vendor->id ,'id' => $request->service_id])->delete();
             if($deleteService == true){
                 return response()->json(['success'=> 'Service deleted successfully'], 200);
             }else{
-                return response()->json(['error'=> 'Something went wrong!'], 200);
+                return response()->json(['error'=> 'Service not found'], 200);
             }
         }else{
-            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+            return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
         }
     }
 
     public function getVendorServices(Request $request)
     {
+        $perPage = 1;
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
+            'page' => 'required|integer'
         ]);
 
         if($validator->fails())
@@ -284,7 +317,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $allServices = VendorServices::where(['user_id' => $request->user_id])->get();
+        $allServices = VendorServices::where(['vendor_id' => $request->vendor_id])->paginate($perPage);
         
         if(count($allServices) > 0){
             return response()->json(['data'=> $allServices], 200);
@@ -554,7 +587,7 @@ class UserController extends Controller
 
     public function getVendorByCategoryId(Request $request)
     {
-        $perPage = 3;
+        $perPage = 2;
         $validator = Validator::make($request->all(), [
             'category_id'  => 'required|integer',
             'page' => 'required|integer'
@@ -566,11 +599,26 @@ class UserController extends Controller
         }
 
         $category = Category::find($request->category_id);
-        if($category != null){
-            $users = $category->users()->where('is_published', '1')->paginate($perPage);
 
-            if(count($users) > 0){
-                return response()->json(['success'=> true, 'data' =>$users ], 200);
+        if($category != null)
+        {
+            $vendors = $category->users()->where('is_published', '1')->paginate($perPage);
+            $data = array();
+
+            foreach($vendors as $vendor)
+            {
+                $count = $vendor->reviews()->count();
+                if($count > 0){
+                    $avgRating = ['avgRating' => $vendor->reviews()->sum('rating')/$vendor->reviews()->count()];
+                }else{
+                    $avgRating = ['avgRating' => null];
+                }
+                $price = ['minPrice' => $vendor->services()->min('price'),'maxPrice' => $vendor->services()->max('price')];
+                $data[] = array_merge(json_decode($vendor, true),$price,$avgRating);
+            }
+
+            if(count($vendors) > 0){
+                return response()->json(['success'=> true, 'data' =>$data ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'No User Found!' ], 200);
             }
@@ -606,6 +654,8 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required|integer',
+            'service_id' => 'required|integer',
+            'order_id' => 'required|integer',
             'text'  => 'required|string',
             'rating'  => 'required|integer|between:1,5',
         ]);
@@ -619,7 +669,9 @@ class UserController extends Controller
         {
             $user_review = VendorReview::create(array_merge(
                 $validator->validated(),
-                [   'username'  => $user->name,
+                [   
+                    'user_id'  => $user->id,
+                    'username'  => $user->name,
                     'user_pic'  => $user->profile_image,
                 ]
             ));

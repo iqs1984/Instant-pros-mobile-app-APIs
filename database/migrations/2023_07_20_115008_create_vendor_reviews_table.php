@@ -14,11 +14,17 @@ return new class extends Migration
         Schema::create('vendor_reviews', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('vendor_id');
+            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('order_id');
+            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->unsignedBigInteger('service_id');
+            $table->foreign('service_id')->references('id')->on('vendor_services')->onDelete('cascade');
             $table->string('username');
             $table->longText('user_pic');
             $table->longText('text');
             $table->integer('rating');
-            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

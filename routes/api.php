@@ -27,7 +27,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
-    Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
+    Route::post('/getVendorServices',[UserController::class,'getVendorServices']);
     Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
     Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
     Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
@@ -44,6 +44,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
     Route::post('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
+    Route::post('/updateService',[UserController::class,'updateService']);
 
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
@@ -52,7 +53,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
         Route::post('/updateChatUserId',[UserController::class,'UpdateChatUserID']);
         Route::post('/addService',[UserController::class,'addService']);
-        Route::post('/updateService',[UserController::class,'updateService']);
         Route::post('/deleteService',[UserController::class,'deleteService']);
         Route::post('/addVendorAbout',[UserController::class,'addVendorAbout']);
         Route::post('/UpdateUserDetails',[UserController::class,'UpdateUserDetails']);

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('price');
             $table->string('duration');
+            $table->longText('image')->nullable();
             $table->string('status')->default('1');
             $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
