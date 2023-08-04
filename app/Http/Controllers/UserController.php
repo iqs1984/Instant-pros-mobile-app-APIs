@@ -20,6 +20,7 @@ use App\Models\StripeAccountDetails;
 use App\Models\DocumentText;
 use App\Models\VendorReview;
 use App\Models\VendorSlot;
+use App\Models\FavoriteService;
 
 
 class UserController extends Controller
@@ -609,7 +610,7 @@ class UserController extends Controller
             {
                 $count = $vendor->reviews()->count();
                 if($count > 0){
-                    $avgRating = ['avgRating' => $vendor->reviews()->sum('rating')/$vendor->reviews()->count()];
+                    $avgRating = ['avgRating' => number_format(floatval($vendor->reviews()->sum('rating')/$vendor->reviews()->count()),2,'.','')];
                 }else{
                     $avgRating = ['avgRating' => null];
                 }
@@ -770,6 +771,45 @@ class UserController extends Controller
             }
         }else{
             return response()->json(['success'=> true, 'message' =>'No slot found for this vendor id' ], 200);
+        }
+    }
+
+    public function addRemoveFavorite(Request $request)
+    {
+        $user = auth()->user();
+        
+        $validator = Validator::make($request->all(), [
+            'user_id'  => 'required|integer',
+            'service_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($user->id == $request->user_id){
+
+            $service = FavoriteService::where(['user_id' => $request->user_id, 'service_id' => $request->service_id])->first();
+
+            if($service){
+                $delete = $service->delete();
+                if($delete == true){
+                    return response()->json(['success'=> true, 'message' =>'Remove form favourites successfully'], 200);
+                }else{
+                    return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
+                }
+            }else{
+                $addfvrt = FavoriteService::create($validator->validated());
+
+                if($addfvrt == true){
+                    return response()->json(['success'=> true, 'message' =>'Added to favourites successfully'], 200);
+                }else{
+                    return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
+                }
+            }
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Given user_id does not match with login user'], 200);
         }
     }
 }

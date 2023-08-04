@@ -27,7 +27,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
     Route::get('/cities/{state_id?}',[AddressController::class,'getAllCities']);
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
-    Route::post('/getVendorServices',[UserController::class,'getVendorServices']);
+    Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
     Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
     Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
     Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
@@ -37,7 +37,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/forgotPasswordMail',[AuthController::class,'forgotPasswordMail']);
     Route::post('/resetPassword',[AuthController::class,'resetPassword']);
     Route::post('/getDocument',[UserController::class,'getDocument']);
-    Route::post('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
+    Route::get('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
     Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
     Route::post('/deleteVendorSlot',[UserController::class,'deleteVendorSlot']);
     Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
@@ -62,5 +62,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/createReviews',[UserController::class,'createReviews']);
         Route::post('/addVendorSlot',[UserController::class,'addVendorSlot']);
         Route::post('/createOrder',[OrderController::class,'createOrder']);
+        Route::post('/addRemoveFavorite',[UserController::class,'addRemoveFavorite']);
     });
 });
