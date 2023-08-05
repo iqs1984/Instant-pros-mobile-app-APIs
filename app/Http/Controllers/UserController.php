@@ -812,4 +812,45 @@ class UserController extends Controller
             return response()->json(['success'=> false, 'message' =>'Given user_id does not match with login user'], 200);
         }
     }
+
+    public function ratingPercentage(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $totalVendorReview = VendorReview::where(['vendor_id' => $request->vendor_id])->get();
+        if(count($totalVendorReview) > 0){
+            $totalVendorReviewSum = $totalVendorReview->sum('rating');
+        
+            $totalReviewCount = ['totalReviewCount' => $totalVendorReview->count()];
+            $overallRating = ['overAllRating' => number_format(floatval($totalVendorReviewSum/$totalReviewCount['totalReviewCount']),2,'.','')];
+            
+            $rating1 = VendorReview::where(['vendor_id' => $request->vendor_id, 'rating' => 1])->count();
+            $rating2 = VendorReview::where(['vendor_id' => $request->vendor_id, 'rating' => 2])->count();
+            $rating3 = VendorReview::where(['vendor_id' => $request->vendor_id, 'rating' => 3])->count();
+            $rating4 = VendorReview::where(['vendor_id' => $request->vendor_id, 'rating' => 4])->count();
+            $rating5 = VendorReview::where(['vendor_id' => $request->vendor_id, 'rating' => 5])->count();
+            
+            $allRating =[$rating1,$rating2,$rating3,$rating4,$rating5];
+            
+            $ratingPercentageArr = array();
+            foreach($allRating as $key => $rating){
+                $percentage = ($rating * 100 )/($totalReviewCount['totalReviewCount']);
+                $ratingPercentageArr['Rating_'.$key+1] = $percentage;
+            }
+            
+            $finalArray = array_merge($totalReviewCount,$overallRating,$ratingPercentageArr);
+
+            return response()->json(['success'=> true, 'data' => $finalArray], 200);
+
+        }else{
+            return response()->json(['success'=> true, 'message' => 'No vendor review found!'], 200);
+        }
+    }
 }

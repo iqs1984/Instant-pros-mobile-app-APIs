@@ -45,6 +45,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
     Route::post('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
     Route::post('/updateService',[UserController::class,'updateService']);
+    Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
 
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
