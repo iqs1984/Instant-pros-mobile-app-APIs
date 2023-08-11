@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreign('service_id')->references('id')->on('vendor_services')->onDelete('cascade');
             $table->string('username');
             $table->longText('user_pic');
-            $table->longText('text');
+            $table->longText('comment');
             $table->integer('rating');
             $table->timestamps();
         });

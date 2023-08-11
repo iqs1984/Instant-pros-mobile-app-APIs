@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->enum('status',['0','1'])->default('0');
+            $table->enum('status',['0','1','2'])->default('0');
             $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });

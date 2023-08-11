@@ -34,8 +34,11 @@ class OrderController extends Controller
         if($user->role == 'user' && $user->id == $request->user_id)
         {
             $createOrder = Order::create($validator->validated());
+            $slotDetails = VendorSlot::where('id' , $request->slot_id)->first();
 
             if($createOrder){
+                $slotDetails->status = '1';
+                $slotDetails->save();
                 return response()->json(['success'=> true, 'message' => 'Order Created successfully','order_id' =>$createOrder->id ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'Something went wrong!' ], 200);
@@ -195,4 +198,25 @@ class OrderController extends Controller
             return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
         }
     }
+
+    // public function rescheduleOrder(Request $request)
+    // {
+    //     $user = auth()->user();
+
+    //     $validator = Validator::make($request->all(), [
+    //         'order_id'  => 'required|integer',
+    //         'vendor_id' => 'required|integer',
+    //         'slot_id'   => 'required|integer',
+    //         'date'      => 'required|date_format:Y-m-d|after:yesterday',
+    //     ]);
+
+    //     if($validator->fails())
+    //     {
+    //         return $validator->messages()->toJson();
+    //     }
+
+    //     $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->find($request->order_id);
+    //     // $orderDetails->slot_id
+    //     // dd($orderDetails);
+    // }
 }

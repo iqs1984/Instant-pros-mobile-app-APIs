@@ -307,7 +307,7 @@ class UserController extends Controller
 
     public function getVendorServices(Request $request)
     {
-        $perPage = 1;
+        $perPage = 3;
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required',
             'page' => 'required|integer'
@@ -329,10 +329,10 @@ class UserController extends Controller
 
     public function addVendorAbout(Request $request)
     {
-        $user = auth()->user();
+        $vendor = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
             'description' => 'required|string'
         ]);
 
@@ -341,9 +341,9 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if($request->user_id == $user->id)
+        if($request->vendor_id == $vendor->id)
         {
-            $aboutData = VendorAboutData::where(['user_id' => $user->id])->first();
+            $aboutData = VendorAboutData::where(['vendor_id' => $vendor->id])->first();
             if($aboutData){
                 
                 $aboutData->description = $request->description;
@@ -355,7 +355,7 @@ class UserController extends Controller
                                          'data' => $aboutData], 200);
             }
         }else{
-            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+            return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
         }
     }
 
@@ -588,7 +588,7 @@ class UserController extends Controller
 
     public function getVendorByCategoryId(Request $request)
     {
-        $perPage = 2;
+        $perPage = 3;
         $validator = Validator::make($request->all(), [
             'category_id'  => 'required|integer',
             'page' => 'required|integer'
@@ -621,7 +621,7 @@ class UserController extends Controller
             if(count($vendors) > 0){
                 return response()->json(['success'=> true, 'data' =>$data ], 200);
             }else{
-                return response()->json(['success'=> false, 'message' =>'No User Found!' ], 200);
+                return response()->json(['success'=> false, 'message' =>'No Vendor Found!' ], 200);
             }
         }else{
             return response()->json(['success'=> false, 'message' =>'No Category Found!' ], 200);
@@ -657,7 +657,7 @@ class UserController extends Controller
             'vendor_id'  => 'required|integer',
             'service_id' => 'required|integer',
             'order_id' => 'required|integer',
-            'text'  => 'required|string',
+            'comment'  => 'required|string',
             'rating'  => 'required|integer|between:1,5',
         ]);
 
@@ -751,6 +751,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required|integer',
             'date'  => 'required|date_format:Y-m-d|after:yesterday',
+            'status' => 'required|between:0,2'
         ]);
 
         if($validator->fails())
@@ -760,10 +761,14 @@ class UserController extends Controller
         
         $vendorExist = VendorSlot::where(['vendor_id' => $request->vendor_id])->get();
 
-        if(count($vendorExist) > 0){
+        if(count($vendorExist) > 0)
+        {
+            if($request->status != 2){
+                $slotOnDate = VendorSlot::where(['vendor_id' => $request->vendor_id, 'date' => $request->date, 'status' => $request->status])->get();
+            }else{
+                $slotOnDate = VendorSlot::where(['vendor_id' => $request->vendor_id, 'date' => $request->date])->get();
+            }
 
-            $slotOnDate = VendorSlot::where(['vendor_id' => $request->vendor_id, 'date' => $request->date])->get();
-           
             if(count($slotOnDate) > 0){
                 return response()->json(['success'=> true, 'data' => $slotOnDate ], 200);
             }else{

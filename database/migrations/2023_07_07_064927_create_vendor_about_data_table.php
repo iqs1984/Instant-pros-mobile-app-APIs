@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('vendor_about_data', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->unique();
+            $table->unsignedBigInteger('vendor_id')->unique();
             $table->longText('description');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
