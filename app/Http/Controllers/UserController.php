@@ -362,7 +362,7 @@ class UserController extends Controller
     public function getVendorAbout(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
         ]);
 
         if($validator->fails())
@@ -370,7 +370,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $aboutData = VendorAboutData::where(['user_id' => $request->user_id])->first();
+        $aboutData = VendorAboutData::where(['vendor_id' => $request->vendor_id])->first();
         if($aboutData){
             return response()->json(['data'  => $aboutData], 200);
         }else{
