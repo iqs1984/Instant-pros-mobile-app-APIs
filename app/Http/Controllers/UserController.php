@@ -128,7 +128,7 @@ class UserController extends Controller
     }
 
 
-    public function UpdateUserFcmTokens(Request $request)
+    public function updateFcmToken(Request $request)
     {
         $user = auth()->user();
         $validator = Validator::make($request->all(), [
@@ -380,7 +380,7 @@ class UserController extends Controller
 
     public function uploadGalleryImage(Request $request)
     {
-        $user = auth()->user();
+        $vendor = auth()->user();
 
         $validator = Validator::make($request->all(), [
             'images' => 'required|array',
@@ -402,7 +402,7 @@ class UserController extends Controller
                 $image->move(public_path('uploads'), $fileName);
 
                 $imageModel = new VendorGalleryImages();
-                $imageModel->user_id = $user->id;
+                $imageModel->vendor_id = $vendor->id;
                 $imageModel->image_name = $fileName;
                 $imageModel->image_path = '/uploads/' . $fileName;
                 $imageModel->save();
@@ -417,7 +417,7 @@ class UserController extends Controller
     public function getGalleryImages(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
+            'vendor_id' => 'required',
         ]);
 
         if($validator->fails())
@@ -425,7 +425,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $images = VendorGalleryImages::where('user_id', $request->user_id)->get();
+        $images = VendorGalleryImages::where('vendor_id', $request->vendor_id)->get();
         if(count($images) > 0){
             foreach($images as $image)
             {

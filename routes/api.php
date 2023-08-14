@@ -51,7 +51,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
-        Route::post('/updateFcmToken',[UserController::class,'UpdateUserFcmTokens']);
+        Route::post('/updateFcmToken',[UserController::class,'updateFcmToken']);
         Route::post('/updateChatUserId',[UserController::class,'UpdateChatUserID']);
         Route::post('/addService',[UserController::class,'addService']);
         Route::post('/deleteService',[UserController::class,'deleteService']);
