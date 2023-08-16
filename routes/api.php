@@ -30,7 +30,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
     Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
     Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
-    Route::post('/getGalleryImages',[UserController::class,'getGalleryImages']);
+    Route::get('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
     Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
     Route::post('/getStripeAccount',[UserController::class,'getStripeAccount']);

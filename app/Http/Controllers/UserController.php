@@ -416,8 +416,10 @@ class UserController extends Controller
 
     public function getGalleryImages(Request $request)
     {
+        $perPage = 3;
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required',
+            'page' => 'required|integer',
         ]);
 
         if($validator->fails())
@@ -425,7 +427,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $images = VendorGalleryImages::where('vendor_id', $request->vendor_id)->get();
+        $images = VendorGalleryImages::where('vendor_id', $request->vendor_id)->paginate($perPage);
         if(count($images) > 0){
             foreach($images as $image)
             {
