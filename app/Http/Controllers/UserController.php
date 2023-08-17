@@ -495,12 +495,12 @@ class UserController extends Controller
 
     public function addStripeAccount(Request $request)
     {
-        $user = auth()->user();
+        $vendor = auth()->user();
 
         $validator = Validator::make($request->all(), [
             'publishable_key' => ['required', new StripeKeyValidator],
             'secret_key' => ['required', new StripeKeyValidator],
-            'user_id' =>'required'
+            'vendor_id' =>'required'
         ]);
 
         if($validator->fails())
@@ -508,15 +508,15 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if($request->user_id == $user->id)
+        if($request->vendor_id == $vendor->id)
         {
-            $StripeAccDetails = StripeAccountDetails::where('user_id',$request->user_id)->first();
+            $StripeAccDetails = StripeAccountDetails::where('vendor_id',$request->vendor_id)->first();
 
             if($StripeAccDetails){
                 
                 $StripeAccDetails->publishable_key = $request->publishable_key;
                 $StripeAccDetails->secret_key = $request->secret_key;
-                $StripeAccDetails->user_id = $request->user_id;
+                $StripeAccDetails->vendor_id = $request->vendor_id;
                 $StripeAccDetails->save();
 
                 return response()->json(['success'=> 'Stripe Account Details updated successfully'],200);
@@ -524,21 +524,21 @@ class UserController extends Controller
             }else{
                 $StripeAccDetails = StripeAccountDetails::create(array_merge(
                     $validator->validated(),
-                    ['user_id'  => $user->id]
+                    ['vendor_id'  => $vendor->id]
                 ));
             }
         
             return response()->json(['success'=> 'Stripe Account Details save successfully',
                                       'data' => $StripeAccDetails], 200);
         }else{
-            return response()->json(['error'=>'given user_id does not match with login user_id'], 201);
+            return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
         }
     }
 
     public function getStripeAccount(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required',
+            'vendor_id'  => 'required',
         ]);
 
         if($validator->fails())
@@ -546,7 +546,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $StripeAccount = StripeAccountDetails::where(['user_id' => $request->user_id])->get();
+        $StripeAccount = StripeAccountDetails::where(['vendor_id' => $request->vendor_id])->get();
         
         if(count($StripeAccount) > 0){
             return response()->json(['success'=>true,'message'=>'Stripe Account Details','data'=> $StripeAccount], 200);

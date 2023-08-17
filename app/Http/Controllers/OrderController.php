@@ -205,7 +205,6 @@ class OrderController extends Controller
 
     //     $validator = Validator::make($request->all(), [
     //         'order_id'  => 'required|integer',
-    //         'vendor_id' => 'required|integer',
     //         'slot_id'   => 'required|integer',
     //         'date'      => 'required|date_format:Y-m-d|after:yesterday',
     //     ]);
@@ -215,8 +214,9 @@ class OrderController extends Controller
     //         return $validator->messages()->toJson();
     //     }
 
+
     //     $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->find($request->order_id);
-    //     // $orderDetails->slot_id
-    //     // dd($orderDetails);
+    //     $orderDetails->slot_id;
+    //     dd($orderDetails);
     // }
 }

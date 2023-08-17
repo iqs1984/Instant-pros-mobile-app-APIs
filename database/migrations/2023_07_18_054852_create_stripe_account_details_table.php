@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('stripe_account_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('vendor_id');
             $table->longText('publishable_key');
             $table->longText('secret_key');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
