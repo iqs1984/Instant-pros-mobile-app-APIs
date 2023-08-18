@@ -81,7 +81,7 @@ class OrderController extends Controller
 
             $user = $orderDetails->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId']);
             $vendor = $orderDetails->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
-            $service = $orderDetails->service->only(['id', 'vendor_id', 'title', 'price','duration','status']);
+            $service = $orderDetails->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
             $slot = $orderDetails->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
 
             return response()->json(['success'=> true,'order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot  ], 200);
@@ -187,7 +187,7 @@ class OrderController extends Controller
     
                 $user = $data->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId']);
                 $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
-                $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','status']);
+                $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
                 $slot = $data->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
 
                 $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot];
@@ -196,6 +196,46 @@ class OrderController extends Controller
 
         }else {
             return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
+        }
+    }
+
+    public function myBooking(Request $request)
+    {
+        $user = auth()->user();
+        $perPage = 2;
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|integer',
+            'page' => 'required|integer'
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        if($user->id == $request->user_id)
+        {
+            $allOrders = $user->orders()->paginate($perPage);
+
+            $data = array();
+    
+            foreach($allOrders as $order){
+    
+                $service = VendorServices::where('id',$order->service_id)->first();
+                
+                $data[] = [
+                    'order_id' => $order->id,
+                    'title' => $service->title,
+                    'price' => $service->price,
+                    'duration' => $service->duration,
+                    'image' => $service->image,
+                ];
+            }
+    
+            return response()->json(['success'=> true,'data' => $data], 200);
+        }else{
+            return response()->json(['success'=> false,'data' =>'user_id does not matched with login_user'], 200);
         }
     }
 

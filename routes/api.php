@@ -64,5 +64,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/addVendorSlot',[UserController::class,'addVendorSlot']);
         Route::post('/createOrder',[OrderController::class,'createOrder']);
         Route::post('/addRemoveFavorite',[UserController::class,'addRemoveFavorite']);
+        Route::get('/myBooking',[OrderController::class,'myBooking']);
     });
 });
