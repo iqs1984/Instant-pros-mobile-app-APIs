@@ -239,24 +239,57 @@ class OrderController extends Controller
         }
     }
 
-    // public function rescheduleOrder(Request $request)
-    // {
-    //     $user = auth()->user();
+    public function orderReschedule(Request $request)
+    {
+        $user = auth()->user();
 
-    //     $validator = Validator::make($request->all(), [
-    //         'order_id'  => 'required|integer',
-    //         'slot_id'   => 'required|integer',
-    //         'date'      => 'required|date_format:Y-m-d|after:yesterday',
-    //     ]);
+        $validator = Validator::make($request->all(), [
+            'order_id'      => 'required|integer',
+            'new_slot_id'   => 'required|integer',
+        ]);
 
-    //     if($validator->fails())
-    //     {
-    //         return $validator->messages()->toJson();
-    //     }
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
+        $orderDetails = Order::where('id',$request->order_id)->first();
+        $oldSlotDetails = VendorSlot::where('id',$orderDetails->slot_id)->first();
+        $newSlotDetails = VendorSlot::where(['id' => $request->new_slot_id, 'status' => '0'])->first();
 
-    //     $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->find($request->order_id);
-    //     $orderDetails->slot_id;
-    //     dd($orderDetails);
-    // }
+        if($orderDetails)
+        {
+            $orderDetails->slot_id = $request->new_slot_id;
+            $success = $orderDetails->save();
+            if($success == true)
+            {
+                $newSlotDetails->status = '1';
+                $new_slot_status = $newSlotDetails->save();
+
+                if($new_slot_status == true)
+                {
+                    $oldSlotDetails->status = '0';
+                    $old_slot_status = $oldSlotDetails->save();
+
+                    if($old_slot_status == true)
+                    {
+                        return response()->json(['success'=> true,'data' =>'Order reschedule successfully'], 200);
+
+                    }else{
+
+                        return response()->json(['success'=> false,'data' =>'new slot updated but old slot status not updated'], 200);
+                    }
+                }else{
+
+                    return response()->json(['success'=> false,'data' =>'new slot status not updated'], 200);
+                }
+            }else{
+
+                return response()->json(['success'=> false,'data' =>'order slot updated but old and new slot status not updated'], 200);
+            }
+        }else{
+
+            return response()->json(['success'=> false,'data' =>'Order not found!'], 200);
+        }
+    }
 }

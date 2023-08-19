@@ -7,16 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\OrderController;
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+
 
 Route::group( ['middleware' => ['api']],function($router)
 {
@@ -46,6 +37,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
+    Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
 
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
