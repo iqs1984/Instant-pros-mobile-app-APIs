@@ -307,7 +307,7 @@ class UserController extends Controller
 
     public function getVendorServices(Request $request)
     {
-        $perPage = 3;
+        $perPage = 5;
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required',
             'page' => 'required|integer'
@@ -416,7 +416,7 @@ class UserController extends Controller
 
     public function getGalleryImages(Request $request)
     {
-        $perPage = 3;
+        $perPage = 5;
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required',
             'page' => 'required|integer',
@@ -590,7 +590,7 @@ class UserController extends Controller
 
     public function getVendorByCategoryId(Request $request)
     {
-        $perPage = 3;
+        $perPage = 5;
         $validator = Validator::make($request->all(), [
             'category_id'  => 'required|integer',
             'page' => 'required|integer'

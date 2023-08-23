@@ -202,7 +202,7 @@ class OrderController extends Controller
     public function myBooking(Request $request)
     {
         $user = auth()->user();
-        $perPage = 2;
+        $perPage = 5;
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',
