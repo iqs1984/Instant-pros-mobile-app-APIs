@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('address');
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->enum('order_status',['1','2','3','4','5','6','7'])->default('1');
+            $table->date('accepted_at')->nullable();
             $table->timestamps();
         });
     }

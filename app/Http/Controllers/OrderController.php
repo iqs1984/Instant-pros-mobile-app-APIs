@@ -113,9 +113,13 @@ class OrderController extends Controller
             switch ($request->order_status) {
                 case 2:
                     $status_name = 'Order accepted successfully';
+                    $orderDetails->accepted_at = now();
                     break;
                 case 3:
                     $status_name = 'Order cancelled successfully';
+                    $slotDetails = VendorSlot::where('id',$orderDetails->slot_id)->first();
+                    $slotDetails->status = '0';
+                    $slotDetails->save();
                     break;
                 case 4:
                     $status_name = 'payment done successfully';
@@ -130,7 +134,6 @@ class OrderController extends Controller
                     $status_name = 'Feedback updated successfully';
                     break;
             }
-            
             $orderDetails->order_status = $request->order_status;
             $success = $orderDetails->save();
             if($success){
@@ -216,8 +219,7 @@ class OrderController extends Controller
 
         if($user->id == $request->user_id)
         {
-            $allOrders = $user->orders()->paginate($perPage);
-
+            $allOrders = $user->orders()->where('order_status','<>','3')->paginate($perPage);
             $data = array();
     
             foreach($allOrders as $order){
