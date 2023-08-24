@@ -75,6 +75,7 @@ class OrderController extends Controller
                 'address' => $orderDetails->address,
                 'payment_id' => $orderDetails->payment_id,
                 'order_status' => $orderDetails->order_status,
+                'accepted_at' => $orderDetails->accepted_at,
                 'created_at' => date($orderDetails->created_at),
                 'updated_at' => date($orderDetails->updated_at),
             ];
