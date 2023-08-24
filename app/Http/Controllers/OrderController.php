@@ -149,8 +149,12 @@ class OrderController extends Controller
 
     public function getOrderByStatus(Request $request)
     {
+        $perPage = 2;
+        $login_user = auth()->user();
+
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|string|in:upcoming,cancelled,completed'
+            'order_status' => 'required|integer|in:1,3,6',
+            'page' => 'required|integer|min:0'
         ]);
 
         if($validator->fails())
@@ -158,18 +162,29 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
+        if($login_user->role == 'user')
+        {
+            $user = $login_user;
+            $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => $request->order_status])->paginate($perPage);
 
-        if($request->order_status == 'upcoming'){
-            $orderStatus = '1';
-        }elseif($request->order_status == 'cancelled'){
-            $orderStatus = '3';
-        }elseif($request->order_status == 'completed'){
-            $orderStatus = '6';
+        }else{
+            $vendor = $login_user;
+            $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => $request->order_status])->paginate($perPage);
         }
 
-        $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('order_status', $orderStatus)->get();
+        switch ($request->order_status) {
+            case 1:
+                $error_msg = 'No upcoming order found!';
+                break;
+            case 3:
+                $error_msg = 'No cancelled order found!';
+                break;
+            case 6:
+                $error_msg = 'No completed order found!';
+                break;
+        }
 
-        if($orderDetails)
+        if(count($orderDetails) > 0)
         {
             $jsonData = array();
 
@@ -185,6 +200,7 @@ class OrderController extends Controller
                     'address' => $data->address,
                     'payment_id' => $data->payment_id,
                     'order_status' => $data->order_status,
+                    'accepted_at' => $data->accepted_at,
                     'created_at' => date($data->created_at),
                     'updated_at' => date($data->updated_at),
                 ];
@@ -199,7 +215,7 @@ class OrderController extends Controller
             return response()->json(['success'=> true,'data' =>$jsonData], 200);
 
         }else {
-            return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
+            return response()->json(['success'=> false, 'message' => $error_msg], 200);
         }
     }
 

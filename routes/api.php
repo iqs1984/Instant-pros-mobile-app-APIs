@@ -34,7 +34,6 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
-    Route::post('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
     Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
@@ -57,5 +56,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/createOrder',[OrderController::class,'createOrder']);
         Route::post('/addRemoveFavorite',[UserController::class,'addRemoveFavorite']);
         Route::get('/myBooking',[OrderController::class,'myBooking']);
+        Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
     });
 });
