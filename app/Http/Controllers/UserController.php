@@ -20,7 +20,7 @@ use App\Models\StripeAccountDetails;
 use App\Models\DocumentText;
 use App\Models\VendorReview;
 use App\Models\VendorSlot;
-use App\Models\FavoriteService;
+use App\Models\FavoriteVendor;
 
 
 class UserController extends Controller
@@ -786,8 +786,7 @@ class UserController extends Controller
         $user = auth()->user();
         
         $validator = Validator::make($request->all(), [
-            'user_id'  => 'required|integer',
-            'service_id'  => 'required|integer',
+            'vendor_id'  => 'required|integer',
         ]);
 
         if($validator->fails())
@@ -795,28 +794,54 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        if($user->id == $request->user_id){
-
-            $service = FavoriteService::where(['user_id' => $request->user_id, 'service_id' => $request->service_id])->first();
-
-            if($service){
-                $delete = $service->delete();
-                if($delete == true){
-                    return response()->json(['success'=> true, 'message' =>'Remove form favourites successfully'], 200);
-                }else{
-                    return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
-                }
+        $isExist = FavoriteVendor::where(['user_id' => $user->id, 'vendor_id' => $request->vendor_id])->first();
+        
+        if($isExist){
+            $delete = $isExist->delete();
+            if($delete == true){
+                return response()->json(['success'=> true, 'message' =>'Remove form favourites list'], 200);
             }else{
-                $addfvrt = FavoriteService::create($validator->validated());
-
-                if($addfvrt == true){
-                    return response()->json(['success'=> true, 'message' =>'Added to favourites successfully'], 200);
-                }else{
-                    return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
-                }
+                return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
             }
         }else{
-            return response()->json(['success'=> false, 'message' =>'Given user_id does not match with login user'], 200);
+            $addfvrt = FavoriteVendor::create(['user_id' => $user->id, 'vendor_id' => $request->vendor_id]);
+
+            if($addfvrt == true){
+                return response()->json(['success'=> true, 'message' =>'Added to favourites list'], 200);
+            }else{
+                return response()->json(['success'=> false, 'message' =>'Something went worng!'], 200);
+            }
+        }
+        
+    }
+
+    public function getFavoriteVendors(Request $request)
+    {
+        $perPage = 4;
+        $user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'page'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $favoriteList = FavoriteVendor::where('user_id', $user->id)->paginate($perPage);
+        $jsonObj = array();
+        
+        if(count($favoriteList) > 0){
+            foreach($favoriteList as $list){
+
+                $vendorDetails = User::where(['id' => $list->vendor_id])->first();
+                $jsonObj[] =$vendorDetails;
+    
+            }
+            return response()->json(['success'=> true, 'data' =>$jsonObj], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'No favorite vendor found!'], 200);
         }
     }
 

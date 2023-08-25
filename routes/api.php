@@ -39,6 +39,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
 
 
+
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {
         Route::get('/userDetails',[UserController::class,'getUserDetails']);
@@ -57,5 +58,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/addRemoveFavorite',[UserController::class,'addRemoveFavorite']);
         Route::get('/myBooking',[OrderController::class,'myBooking']);
         Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
+        Route::get('/getFavoriteVendors',[UserController::class,'getFavoriteVendors']);
     });
 });
