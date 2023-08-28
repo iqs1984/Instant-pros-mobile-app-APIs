@@ -153,7 +153,7 @@ class OrderController extends Controller
         $login_user = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|integer|in:1,3,6',
+            'order_status' => 'required|integer|in:0,3,8',
             'page' => 'required|integer|min:0'
         ]);
 
@@ -162,24 +162,51 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
+        $forUpcoming = ['1', '2', '4', '5'];
+        $forCompleted = ['6', '7'];
+
         if($login_user->role == 'user')
         {
             $user = $login_user;
-            $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => $request->order_status])->paginate($perPage);
+            if($request->order_status == 0)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forUpcoming)->paginate($perPage);
 
+            }elseif($request->order_status == 3)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => '3'])->paginate($perPage);
+                
+            }elseif($request->order_status == 8)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->paginate($perPage);
+            }
+            
         }else{
             $vendor = $login_user;
-            $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => $request->order_status])->paginate($perPage);
+
+            if($request->order_status == 0)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forUpcoming)->paginate($perPage);
+
+            }elseif($request->order_status == 3)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->paginate($perPage);
+                
+            }elseif($request->order_status == 8)
+            {
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->paginate($perPage);
+            }
+
         }
 
         switch ($request->order_status) {
-            case 1:
+            case 0:
                 $error_msg = 'No upcoming order found!';
                 break;
             case 3:
                 $error_msg = 'No cancelled order found!';
                 break;
-            case 6:
+            case 8:
                 $error_msg = 'No completed order found!';
                 break;
         }
