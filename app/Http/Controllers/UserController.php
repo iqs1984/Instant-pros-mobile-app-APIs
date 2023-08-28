@@ -361,6 +361,8 @@ class UserController extends Controller
 
     public function getVendorAbout(Request $request)
     {
+        $user = auth()->user();
+
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required',
         ]);
@@ -370,9 +372,18 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
+        $favoriteVendor = FavoriteVendor::where(['user_id' => $user->id, 'vendor_id' => $request->vendor_id])->first();
+
+        if($favoriteVendor){
+            $isFavorite = ['isFavorite' => 1];
+        }else{
+            $isFavorite = ['isFavorite' => 0];
+        }
+        
         $aboutData = VendorAboutData::where(['vendor_id' => $request->vendor_id])->first();
+
         if($aboutData){
-            return response()->json(['data'  => $aboutData], 200);
+            return response()->json(['data'  => array_merge(json_decode($aboutData, true),$isFavorite)], 200);
         }else{
             return response()->json(['error'=> 'No text found'], 200);
         }
