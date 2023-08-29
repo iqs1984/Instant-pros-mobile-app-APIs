@@ -59,5 +59,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::get('/myBooking',[OrderController::class,'myBooking']);
         Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
         Route::get('/getFavoriteVendors',[UserController::class,'getFavoriteVendors']);
+        // Route::get('/myTransaction',[OrderController::class,'myTransaction']);
     });
 });

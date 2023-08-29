@@ -130,11 +130,24 @@ class AuthController extends Controller
                 'error' => 'Could not create token'
             ], 500);
         }
-        return response()->json([
-            'token' => $token,
-            'token_type' => 'bearer',
-            'expire_in' => JWTAuth::factory()->getTTL()*60,
-        ], 200);
+
+        $user = auth()->user();
+
+        if($user->role == 'user'){
+            return response()->json([
+                'token' => $token,
+                'token_type' => 'bearer',
+                'expire_in' => JWTAuth::factory()->getTTL()*60,
+            ], 200);
+
+        }else{
+            return response()->json([
+                'token' => $token,
+                'token_type' => 'bearer',
+                'expire_in' => JWTAuth::factory()->getTTL()*60,
+                'is_published' => $user->is_published,
+            ], 200);
+        }
     }
 
 

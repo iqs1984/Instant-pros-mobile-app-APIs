@@ -338,4 +338,39 @@ class OrderController extends Controller
             return response()->json(['success'=> false,'data' =>'Order not found!'], 200);
         }
     }
+
+    // public function myTransaction(Request $request)
+    // {
+    //     $user = auth()->user();
+    //     $perPage = 5;
+
+    //     $validator = Validator::make($request->all(), [
+    //         'from_date'      => 'date_format:Y-m-d',
+    //         'to_date'   => 'date_format:Y-m-d|after:from_date',
+    //         'payment_status_pending' => 'integer|in:0',
+    //         'payment_status_escrow' => 'integer|in:1',
+    //         'payment_status_paid' => 'integer|in:2',
+    //         'vendor_name' => 'string',
+    //     ]);
+
+    //     if($validator->fails())
+    //     {
+    //         return $validator->messages()->toJson();
+    //     }
+
+    //     $allOrders = $user->orders();
+
+    //     if($request->from_date != '' && $request->to_date != ''){
+
+    //         $orderList = $allOrders->whereBetween('created_at',[$request->from_date, $request->to_date]);
+    //     }
+    //     if($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != ''){
+    //     }
+
+    //     if($request->vendor_name != ''){
+    //     }
+
+    //     return response()->json(['success'=> true,'data' =>$orderList->get()], 200);
+
+    // }
 }
