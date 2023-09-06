@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\VendorServices;
 use App\Models\Category;
 use App\Models\VendorSlot;
+use App\Models\UserFcmTokens;
 
 class OrderController extends Controller
 {
@@ -39,6 +40,10 @@ class OrderController extends Controller
             if($createOrder){
                 $slotDetails->status = '1';
                 $slotDetails->save();
+                $msg = 'New order received';
+
+                $this->notificationCURL($user->id, $createOrder->vendor_id, $createOrder->id, $msg, $msg, $user->id, $createOrder->vendor_id);
+                
                 return response()->json(['success'=> true, 'message' => 'Order Created successfully','order_id' =>$createOrder->id ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'Something went wrong!' ], 200);
@@ -96,6 +101,7 @@ class OrderController extends Controller
 
     public function orderUpdate(Request $request)
     {
+        $login_user = auth()->user();
         $validator = Validator::make($request->all(), [
             'order_id'  => 'required|integer',
             'order_status'  => 'required|integer|between:2,7',
@@ -115,26 +121,39 @@ class OrderController extends Controller
                 case 2:
                     $status_name = 'Order accepted successfully';
                     $orderDetails->accepted_at = now();
+                    $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 3:
                     $status_name = 'Order cancelled successfully';
                     $slotDetails = VendorSlot::where('id',$orderDetails->slot_id)->first();
                     $slotDetails->status = '0';
                     $slotDetails->save();
+                    if($login_user->role == 'user'){
+                        $msg = 'Order Cancelled by the user';
+                        $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                    }else{
+                        $msg = 'Order Cancelled by the vendor';
+                        $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                    }
                     break;
                 case 4:
                     $status_name = 'payment done successfully';
+                    $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 5:
                     $status_name = 'Order in progress';
+                    $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 6:
                     $status_name = 'Order Finished successfully';
+                    $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 7:
                     $status_name = 'Feedback updated successfully';
+                    $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
             }
+
             $orderDetails->order_status = $request->order_status;
             $success = $orderDetails->save();
             if($success){
@@ -144,6 +163,56 @@ class OrderController extends Controller
             }
         }else{
             return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
+        }
+    }
+
+    public function notificationCURL($sender_id, $receiver_id, $order_id, $title, $body, $user_id, $vendor_id){
+        
+        $fcm_token_list  = UserFcmTokens::where('user_id', $receiver_id)->get();
+        $curl_handle = curl_init();
+        
+        $header = array(
+            'Content-Type: application/json',
+            'Authorization: key=AAAApM7ikzU:APA91bHnXVqRtJEBf_hTzANms6QUlhVIxJEtPYAMMuxxYRFYtWrigVy68gC4tJG6s_MzMxVsh4sv_bVLr-TNiiV39VUSUhZlGzFxjygw3tOIS7gDnOYCO76mH8cmheR8_CyIgIvN_Bkv'
+        );
+        
+        foreach($fcm_token_list as $list)
+        {
+            $notify_details = array(
+                'to' => $list->fcm_token,
+                'notification' => array(
+                    'title'             => $title, 
+                    'body'              => $body, 
+                    'mutable_content'   => true, 
+                    'sound'             => 'Tri-tone'
+                ), 
+                'data' => array(
+                    'user_id'       => $user_id, 
+                    'vendor_id'     => $vendor_id,
+                    'title'         => $title, 
+                    'description'   => $body, 
+                    'order_id'      => $order_id, 
+                    'status'        => '0'
+                )
+            );
+
+            $postField = json_encode($notify_details);
+
+            curl_setopt($curl_handle, CURLOPT_URL, 'https://fcm.googleapis.com/fcm/send');
+            curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl_handle, CURLOPT_ENCODING, '');
+            curl_setopt($curl_handle, CURLOPT_MAXREDIRS, 10);
+            curl_setopt($curl_handle, CURLOPT_TIMEOUT, 0);
+            curl_setopt($curl_handle, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl_handle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+            curl_setopt($curl_handle, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl_handle, CURLOPT_POSTFIELDS, $postField);
+            curl_setopt($curl_handle, CURLOPT_HTTPHEADER, $header);
+    
+            $response = curl_exec($curl_handle);
+            curl_close($curl_handle);
+    
+            echo $response;
         }
     }
 
@@ -319,7 +388,9 @@ class OrderController extends Controller
 
                     if($old_slot_status == true)
                     {
-                        return response()->json(['success'=> true,'data' =>'Order reschedule successfully'], 200);
+                        $msg = "Order Rescheduled by the user";
+                        $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                        return response()->json(['success'=> true,'data' =>'Order rescheduled successfully'], 200);
 
                     }else{
 
@@ -339,6 +410,7 @@ class OrderController extends Controller
         }
     }
 
+    
     // public function myTransaction(Request $request)
     // {
     //     $user = auth()->user();

@@ -168,13 +168,13 @@ class AuthController extends Controller
         }
 
         if (!Hash::check($request->input('old_password'), $user->password)) {
-            return response()->json(['error' => 'Old password does not matched'], 401);
+            return response()->json(['status' => false, 'error' => 'Old password does not matched'], 401);
         }
 
         $user->password = bcrypt($request->password);
         $user->save();
 
-        return response()->json(['message' => 'Password changed successfully']);
+        return response()->json(['status' => true,'message' => 'Password changed successfully'],200);
     }
 
 
@@ -207,14 +207,23 @@ class AuthController extends Controller
             }
 
             $user['to'] = $check_email->email;
-            Mail::send('forgotPassword',['username' => $username, 'secret_code' => $secret_code], function ($message) use ($user) {
-                $message->to($user['to']);
-                $message->subject("Forgot Password");
-            });
-            return response()->json(['message' => 'Mail sent successfully']);
 
+            try {
+
+                Mail::send('forgotPassword',['username' => $username, 'secret_code' => $secret_code], function ($message) use ($user) {
+                    $message->to($user['to']);
+                    $message->subject("Forgot Password");
+                });
+
+                return response()->json(['status' => true, 'message' => 'Secret code sent successfully'],200);
+                
+            } catch (\Exception $e) {
+                
+                return response()->json(['status' => false, 'error' => $e->getMessage()],500);
+            }
+                
         }else{
-            return response()->json(['message' => 'No user found!']);
+            return response()->json(['status' => false,'message' => 'Please enter correct email id'],200);
         }
     }
 
@@ -240,9 +249,9 @@ class AuthController extends Controller
             $user->save();
             $password_reset_data->delete();
             
-            return response()->json(['message' => 'Password reset successfully']);
+            return response()->json(['status' => true,'message' => 'Password reset successfully'],200);
         }else{
-            return response()->json(['message' => 'Please enter correct secret code']);
+            return response()->json(['status' => false,'message' => 'Please enter correct secret code'],500);
         }
     }
 }
