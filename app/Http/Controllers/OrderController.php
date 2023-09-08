@@ -112,7 +112,10 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $orderDetails = Order::where('id',$request->order_id)->first();
+        $orderDetails = Order::where('id',$request->order_id)
+        ->where(function ($query) use ($login_user){
+            $query->where('user_id',$login_user->id)->orWhere('vendor_id',$login_user->id);
+        })->first();
 
         if($orderDetails){
 
@@ -131,9 +134,11 @@ class OrderController extends Controller
                     if($login_user->role == 'user'){
                         $msg = 'Order Cancelled by the user';
                         $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
-                    }else{
+                    }else if($login_user->role == 'vendor'){
                         $msg = 'Order Cancelled by the vendor';
                         $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                    }else{
+
                     }
                     break;
                 case 4:
@@ -153,7 +158,7 @@ class OrderController extends Controller
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
             }
-
+            // dd("nitin");
             $orderDetails->order_status = $request->order_status;
             $success = $orderDetails->save();
             if($success){
