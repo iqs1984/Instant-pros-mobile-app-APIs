@@ -51,10 +51,14 @@ class UserController extends Controller
         if($user->role == 'user'){
 
             $validator = Validator::make($request->all(), [
-                'email'      => 'required|email|unique:users,email,'.$user->id.'id',
-                'name'       => 'required|string',
-                'phone'      => 'required|string|unique:users,phone,'.$user->id.'phone',  
-                'address'    => 'required|string',
+                'email'         => 'required|email|unique:users,email,'.$user->id.'id',
+                'name'          => 'required|string',
+                'address'       => 'required|string',
+                'country_id'    => 'required|integer',
+                'state_id'      => 'required|integer',
+                'city_id'       => 'required|integer',
+                'zip_code'      => 'required|integer',
+                'phone'         => 'required|string|unique:users,phone,'.$user->id.'phone',  
             ]);
     
         }else if($user->role == 'vendor'){
@@ -77,29 +81,40 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
+        $country_name = Country::find($request->country_id);
+        $state_name = State::find($request->state_id);
+        $city_name = City::find($request->city_id);
+
         if($user->role == 'user')
         {
             $user->email = $request->email;
             $user->name = $request->name;
             $user->phone = $request->phone;
             $user->address = $request->address;
+            $user->country_id = $request->country_id;
+            $user->country_name = $country_name['country_name'];
+            $user->state_id = $request->state_id;
+            $user->state_name = $state_name['state_name'];
+            $user->city_id = $request->city_id;
+            $user->city_name = $city_name['city_name'];
+            $user->zip_code = $request->zip_code;
             $user->save();
 
         }else{
 
-            $country_name = Country::find($request->country_id);
-            $state_name = State::find($request->state_id);
-            $city_name = City::find($request->city_id);
             $category = Category::find($request->category_id);
-
+            
             $user->email = $request->email;
             $user->business_name = $request->business_name;
             $user->category_id = $request->category_id;
             $user->category_name = $category['category_name'];
             $user->address = $request->address;
             $user->country_id = $request->country_id;
+            $user->country_name = $country_name['country_name'];
             $user->state_id = $request->state_id;
+            $user->state_name = $state_name['state_name'];
             $user->city_id = $request->city_id;
+            $user->city_name = $city_name['city_name'];
             $user->zip_code = $request->zip_code;
             $user->phone = $request->phone;
             $user->save();
