@@ -85,7 +85,7 @@ class OrderController extends Controller
                 'updated_at' => date($orderDetails->updated_at),
             ];
 
-            $user = $orderDetails->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId']);
+            $user = $orderDetails->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId']);
             $vendor = $orderDetails->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
             $service = $orderDetails->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
             $slot = $orderDetails->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
@@ -306,7 +306,7 @@ class OrderController extends Controller
                     'updated_at' => date($data->updated_at),
                 ];
     
-                $user = $data->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId']);
+                $user = $data->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId']);
                 $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
                 $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
                 $slot = $data->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);

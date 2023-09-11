@@ -30,7 +30,7 @@ class UserController extends Controller
         $allUserDetails = auth('api')->user();
 
         if($allUserDetails->role == 'user'){
-            $user = auth('api')->user()->only(['id', 'name', 'email', 'role','phone','profile_image','address','chatUserId','created_at','updated_at']);
+            $user = auth('api')->user()->only(['id', 'name', 'email', 'role','phone','profile_image','address','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId','created_at','updated_at']);
 
             return response()->json(['user'=>$user], 201);
         }else{
@@ -103,7 +103,7 @@ class UserController extends Controller
         }else{
 
             $category = Category::find($request->category_id);
-            
+
             $user->email = $request->email;
             $user->business_name = $request->business_name;
             $user->category_id = $request->category_id;
