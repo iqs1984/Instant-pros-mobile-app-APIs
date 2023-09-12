@@ -223,7 +223,7 @@ class OrderController extends Controller
 
     public function getOrderByStatus(Request $request)
     {
-        $perPage = 2;
+        $perPage = 20;
         $login_user = auth()->user();
 
         $validator = Validator::make($request->all(), [
@@ -323,7 +323,7 @@ class OrderController extends Controller
     public function myBooking(Request $request)
     {
         $user = auth()->user();
-        $perPage = 5;
+        $perPage = 20;
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|integer',

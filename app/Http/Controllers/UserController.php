@@ -322,7 +322,7 @@ class UserController extends Controller
 
     public function getVendorServices(Request $request)
     {
-        $perPage = 5;
+        $perPage = 20;
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required',
             'page' => 'required|integer'
@@ -410,7 +410,7 @@ class UserController extends Controller
 
         $validator = Validator::make($request->all(), [
             'images' => 'required|array',
-            'images.*' => 'image|max:2048',
+            'images.*' => 'image|max:5120',
         ]);
 
         if($validator->fails())
@@ -442,7 +442,7 @@ class UserController extends Controller
 
     public function getGalleryImages(Request $request)
     {
-        $perPage = 5;
+        $perPage = 20;
         $validator = Validator::make($request->all(), [
             'vendor_id' => 'required',
             'page' => 'required|integer',
@@ -468,7 +468,7 @@ class UserController extends Controller
     public function deleteGalleryImage(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
+            'vendor_id' => 'required',
             'item_id' => 'required',
         ]);
 
@@ -477,7 +477,7 @@ class UserController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $image = VendorGalleryImages::where(['user_id' => $request->user_id,'id' => $request->item_id])->first();
+        $image = VendorGalleryImages::where(['vendor_id' => $request->vendor_id,'id' => $request->item_id])->first();
 
         if (File::exists(public_path($image['image_path']))) {
             File::delete(public_path($image['image_path']));
@@ -616,7 +616,7 @@ class UserController extends Controller
 
     public function getVendorByCategoryId(Request $request)
     {
-        $perPage = 5;
+        $perPage = 20;
         $validator = Validator::make($request->all(), [
             'category_id'  => 'required|integer',
             'page' => 'required|integer'
@@ -843,7 +843,7 @@ class UserController extends Controller
 
     public function getFavoriteVendors(Request $request)
     {
-        $perPage = 4;
+        $perPage = 20;
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [

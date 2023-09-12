@@ -20,7 +20,6 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/userFcmToken',[UserController::class,'getUserFcmTokens']);
     Route::get('/getVendorServices',[UserController::class,'getVendorServices']);
     Route::get('/getVendorAbout',[UserController::class,'getVendorAbout']);
-    Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
     Route::get('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
     Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
@@ -59,6 +58,7 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
         Route::get('/getFavoriteVendors',[UserController::class,'getFavoriteVendors']);
         Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
+        Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
         // Route::get('/myTransaction',[OrderController::class,'myTransaction']);
     });
 });
