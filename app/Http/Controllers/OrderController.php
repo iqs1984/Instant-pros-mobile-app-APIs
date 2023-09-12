@@ -127,16 +127,15 @@ class OrderController extends Controller
                     $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 3:
-                    $status_name = 'Order cancelled successfully';
                     $slotDetails = VendorSlot::where('id',$orderDetails->slot_id)->first();
                     $slotDetails->status = '0';
                     $slotDetails->save();
                     if($login_user->role == 'user'){
-                        $msg = 'Order Cancelled by the user';
-                        $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                        $status_name = 'Order Cancelled by the user';
+                        $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     }else if($login_user->role == 'vendor'){
-                        $msg = 'Order Cancelled by the vendor';
-                        $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
+                        $status_name = 'Order Cancelled by the vendor';
+                        $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     }else{
 
                     }
@@ -158,11 +157,10 @@ class OrderController extends Controller
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
             }
-            // dd("nitin");
             $orderDetails->order_status = $request->order_status;
             $success = $orderDetails->save();
             if($success){
-                return response()->json(['success'=> true, 'message' =>$status_name ], 200);
+                return response()->json(['success'=> true, 'message' =>$status_name, 'order_id' => $orderDetails->id ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'something went wrong!' ], 200);
             }
@@ -216,8 +214,6 @@ class OrderController extends Controller
     
             $response = curl_exec($curl_handle);
             curl_close($curl_handle);
-    
-            echo $response;
         }
     }
 
@@ -395,7 +391,7 @@ class OrderController extends Controller
                     {
                         $msg = "Order Rescheduled by the user";
                         $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
-                        return response()->json(['success'=> true,'data' =>'Order rescheduled successfully'], 200);
+                        return response()->json(['success'=> true,'data' =>'Order rescheduled successfully','order_id' => $orderDetails->id ], 200);
 
                     }else{
 
