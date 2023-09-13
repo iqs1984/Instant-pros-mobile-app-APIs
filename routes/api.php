@@ -34,7 +34,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
-    Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
+    
+    
 
 
 
@@ -58,7 +59,9 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);
         Route::get('/getFavoriteVendors',[UserController::class,'getFavoriteVendors']);
         Route::post('/orderUpdate',[OrderController::class,'orderUpdate']);
+        Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
         Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
+        Route::get('/getNotification',[OrderController::class,'getNotification']);
         // Route::get('/myTransaction',[OrderController::class,'myTransaction']);
     });
 });

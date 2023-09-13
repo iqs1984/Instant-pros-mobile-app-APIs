@@ -152,6 +152,18 @@ class AuthController extends Controller
         }
     }
 
+    // public function socialLogin(Request $request)
+    // {
+    //     $this->validate($request, [
+    //         'email' => 'required|email',
+    //         'firstName' => 'required|string',
+    //         'lastName' => 'required|string',
+    //         'userId' => 'required|string',
+    //         'loginType' => 'required|integer'
+    //     ]);
+        
+    // }
+
 
     public function changePassword(Request $request)
     {

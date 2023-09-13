@@ -11,6 +11,7 @@ use App\Models\VendorServices;
 use App\Models\Category;
 use App\Models\VendorSlot;
 use App\Models\UserFcmTokens;
+use App\Models\Notification;
 
 class OrderController extends Controller
 {
@@ -43,7 +44,7 @@ class OrderController extends Controller
                 $msg = 'New order received';
 
                 $this->notificationCURL($user->id, $createOrder->vendor_id, $createOrder->id, $msg, $msg, $user->id, $createOrder->vendor_id);
-                
+
                 return response()->json(['success'=> true, 'message' => 'Order Created successfully','order_id' =>$createOrder->id ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'Something went wrong!' ], 200);
@@ -169,8 +170,18 @@ class OrderController extends Controller
         }
     }
 
-    public function notificationCURL($sender_id, $receiver_id, $order_id, $title, $body, $user_id, $vendor_id){
-        
+    public function notificationCURL($sender_id, $receiver_id, $order_id, $title, $body, $user_id, $vendor_id)
+    {
+        $saveNotification = Notification::create(
+            ['sender_id' =>$sender_id,
+            'receiver_id' =>$receiver_id,
+            'order_id' =>$order_id,
+            'user_id' =>$user_id,
+            'vendor_id' =>$vendor_id,
+            'title' =>$title,
+            'description' =>$body,
+            ]);
+
         $fcm_token_list  = UserFcmTokens::where('user_id', $receiver_id)->get();
         $curl_handle = curl_init();
         
@@ -408,6 +419,30 @@ class OrderController extends Controller
         }else{
 
             return response()->json(['success'=> false,'data' =>'Order not found!'], 200);
+        }
+    }
+
+
+    public function getNotification(Request $request)
+    {
+        $perPage = 20;
+        $login_user = auth()->user();
+
+        $validator = Validator::make($request->all(), [
+            'page' => 'required|integer|min:0',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $notificationList = Notification::where('receiver_id', $login_user->id)->paginate($perPage);
+
+        if(count($notificationList) > 0){
+            return response()->json(['success'=> true,'data' =>$notificationList], 200);
+        }else{
+            return response()->json(['success'=> false,'data' =>'No notification found!'], 500);
         }
     }
 
