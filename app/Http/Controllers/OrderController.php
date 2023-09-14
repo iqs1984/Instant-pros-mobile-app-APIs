@@ -437,10 +437,35 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $notificationList = Notification::where('receiver_id', $login_user->id)->paginate($perPage);
+        $notificationList = Notification::with(['user', 'vendor'])->where('receiver_id', $login_user->id)->paginate($perPage);
 
-        if(count($notificationList) > 0){
-            return response()->json(['success'=> true,'data' =>$notificationList], 200);
+        if(count($notificationList) > 0)
+        {
+            $jsonData = array();
+
+            foreach($notificationList as $data) 
+            {
+                $notificationData = [
+                    'id' => $data->id,
+                    'sender_id' => $data->user_id,
+                    'receiver_id' => $data->vendor_id,
+                    'order_id' => $data->service_id,
+                    'user_id' => $data->slot_id,
+                    'vendor_id' => $data->amount,
+                    'title' => $data->address,
+                    'description' => $data->payment_id,
+                    'status' => $data->order_status,
+                    'created_at' => date($data->created_at),
+                    'updated_at' => date($data->updated_at),
+                ];
+    
+                $user = $data->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId']);
+                $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
+                
+                $jsonData[] = ['notification' =>$notificationData, 'user' =>$user, 'vendor' =>$vendor];
+            }
+
+            return response()->json(['success'=> true,'data' => $jsonData], 200);
         }else{
             return response()->json(['success'=> false,'data' =>'No notification found!'], 500);
         }
