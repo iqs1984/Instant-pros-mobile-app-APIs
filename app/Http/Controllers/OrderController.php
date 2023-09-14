@@ -447,14 +447,14 @@ class OrderController extends Controller
             {
                 $notificationData = [
                     'id' => $data->id,
-                    'sender_id' => $data->user_id,
-                    'receiver_id' => $data->vendor_id,
-                    'order_id' => $data->service_id,
-                    'user_id' => $data->slot_id,
-                    'vendor_id' => $data->amount,
-                    'title' => $data->address,
-                    'description' => $data->payment_id,
-                    'status' => $data->order_status,
+                    'sender_id' => $data->sender_id,
+                    'receiver_id' => $data->receiver_id,
+                    'order_id' => $data->order_id,
+                    'user_id' => $data->user_id,
+                    'vendor_id' => $data->vendor_id,
+                    'title' => $data->title,
+                    'description' => $data->description,
+                    'status' => $data->status,
                     'created_at' => date($data->created_at),
                     'updated_at' => date($data->updated_at),
                 ];
