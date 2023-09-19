@@ -435,9 +435,9 @@ class UserController extends Controller
 
                 $uploadedImages[] = $imageModel->image_path;
             }
-            return response()->json(['message' => 'Images uploaded successfully', 'uploaded_images' => $uploadedImages]);
+            return response()->json(['success' => true,'message' => 'Images uploaded successfully', 'uploaded_images' => $uploadedImages],200);
         }
-        return response()->json(['message' => 'No image files found'], 400);
+        return response()->json(['success' => false,'message' => 'No image files found'], 400);
     }
 
     public function getGalleryImages(Request $request)
@@ -459,9 +459,9 @@ class UserController extends Controller
             {
                 $getImagesPath[] = ['item_id' => $image->id, 'image_path' => url('/').$image->image_path];
             }
-            return response()->json(['Gallery_images' => $getImagesPath]);
+            return response()->json(['success' => true, 'Gallery_images' => $getImagesPath],200);
         }else{
-            return response()->json(['message' => 'No Image found']);
+            return response()->json(['success' => false, 'message' => 'No Image found'],400);
         }
     }
 
@@ -482,9 +482,9 @@ class UserController extends Controller
         if (File::exists(public_path($image['image_path']))) {
             File::delete(public_path($image['image_path']));
             $image->delete();
-            return response()->json(['message' => 'Image deleted successfully']);
+            return response()->json(['success' => true, 'message' => 'Image deleted successfully'],200);
         }else{
-            return response()->json(['message' => 'No Image found']);
+            return response()->json(['success' => false, 'message' => 'No Image found'],400);
         }
     }
 
