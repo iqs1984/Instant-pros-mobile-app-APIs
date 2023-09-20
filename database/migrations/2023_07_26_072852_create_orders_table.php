@@ -21,6 +21,8 @@ return new class extends Migration
             $table->foreign('service_id')->references('id')->on('vendor_services')->onDelete('cascade');
             $table->unsignedBigInteger('slot_id');
             $table->foreign('slot_id')->references('id')->on('vendor_slots')->onDelete('cascade');
+            $table->unsignedBigInteger('review_id');
+            $table->foreign('review_id')->references('id')->on('vendor_reviews')->onDelete('cascade');
             $table->integer('amount');
             $table->string('address');
             $table->unsignedBigInteger('payment_id')->nullable();

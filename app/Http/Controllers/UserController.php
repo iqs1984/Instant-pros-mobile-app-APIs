@@ -21,6 +21,7 @@ use App\Models\DocumentText;
 use App\Models\VendorReview;
 use App\Models\VendorSlot;
 use App\Models\FavoriteVendor;
+use App\Models\Order;
 
 
 class UserController extends Controller
@@ -696,19 +697,35 @@ class UserController extends Controller
 
         if($user->role == 'user')
         {
-            $user_review = VendorReview::create(array_merge(
-                $validator->validated(),
-                [   
-                    'user_id'  => $user->id,
-                    'username'  => $user->name,
-                    'user_pic'  => $user->profile_image,
-                ]
-            ));
-    
-            if($user_review){
-                return response()->json(['success'=> true, 'data' =>$user_review ], 200);
+
+            $isReview = VendorReview::where(['user_id' => $user->id, 'order_id' => $request->order_id ])->first();
+            if($isReview){
+                
+                $isReview->comment = $request->comment;
+                $isReview->rating = $request->rating;
+                $isReview->save();
+
+                return response()->json(['success'=> true, 'message' => 'Review updated successfully'], 200);
+
             }else{
-                return response()->json(['success'=> false, 'message' =>'Something went worng!' ], 200);
+                $user_review = VendorReview::create(array_merge(
+                    $validator->validated(),
+                    [   
+                        'user_id'  => $user->id,
+                        'username'  => $user->name,
+                        'user_pic'  => $user->profile_image,
+                    ]
+                ));
+
+                if($user_review){
+                    $orderDetails = Order::where('id', $request->order_id)->first();
+                    $orderDetails->review_id = $user_review->id;
+                    $orderDetails->save();
+    
+                    return response()->json(['success'=> true, 'data' => $user_review ], 200);
+                }else{
+                    return response()->json(['success'=> false, 'message' =>'Something went worng!' ], 200);
+                }
             }
         }else{
             return response()->json(['success'=> false, 'message' =>'Pass the user access token' ], 200);

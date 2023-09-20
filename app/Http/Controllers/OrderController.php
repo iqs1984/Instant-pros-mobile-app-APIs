@@ -251,15 +251,15 @@ class OrderController extends Controller
             $user = $login_user;
             if($request->order_status == 0)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forUpcoming)->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
 
             }elseif($request->order_status == 3)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => '3'])->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
             }elseif($request->order_status == 8)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
             
         }else{
@@ -267,15 +267,15 @@ class OrderController extends Controller
 
             if($request->order_status == 0)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forUpcoming)->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
 
             }elseif($request->order_status == 3)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
             }elseif($request->order_status == 8)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
 
         }
@@ -317,8 +317,11 @@ class OrderController extends Controller
                 $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
                 $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
                 $slot = $data->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
-
-                $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot];
+                $review = null;
+                if($data->review != null){
+                    $review = $data->review->only(['id', 'vendor_id', 'user_id', 'order_id','service_id','username','user_pic','comment','rating']);
+                }
+                $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot,'review' => $review];
             }
             return response()->json(['success'=> true,'data' =>$jsonData], 200);
 

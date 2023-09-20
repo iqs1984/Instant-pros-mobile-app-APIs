@@ -11,7 +11,7 @@ class AddressController extends Controller
 {
     public function getAllCountries(Request $request){
 
-        $countries = Country::where('status','0')->get();
+        $countries = Country::where('status','1')->get();
 
         if(count($countries) > 0){
             return response()->json([

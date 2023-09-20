@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\VendorServices;
 use App\Models\VendorSlot;
+use App\Models\VendorReview;
 
 class Order extends Model
 {
@@ -32,5 +33,10 @@ class Order extends Model
     public function slot()
     {
         return $this->belongsTo(VendorSlot::class, 'slot_id', 'id');
+    }
+
+    public function review()
+    {
+        return $this->belongsTo(VendorReview::class, 'review_id', 'id');
     }
 }
