@@ -105,7 +105,7 @@ class OrderController extends Controller
         $login_user = auth()->user();
         $validator = Validator::make($request->all(), [
             'order_id'  => 'required|integer',
-            'order_status'  => 'required|integer|between:2,7',
+            'order_status'  => 'required|integer|between:2,8',
         ]);
 
         if($validator->fails())
@@ -154,6 +154,10 @@ class OrderController extends Controller
                     $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 7:
+                    $status_name = 'Fund Released successfully';
+                    $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
+                    break;
+                case 8:
                     $status_name = 'Feedback updated successfully';
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
@@ -234,7 +238,7 @@ class OrderController extends Controller
         $login_user = auth()->user();
 
         $validator = Validator::make($request->all(), [
-            'order_status' => 'required|integer|in:0,3,8',
+            'order_status' => 'required|integer|in:0,3,9',
             'page' => 'required|integer|min:0'
         ]);
 
@@ -243,8 +247,8 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $forUpcoming = ['1', '2', '4', '5'];
-        $forCompleted = ['6', '7'];
+        $forUpcoming = ['1', '2', '4', '5','6'];
+        $forCompleted = ['7','8'];
 
         if($login_user->role == 'user')
         {
@@ -257,7 +261,7 @@ class OrderController extends Controller
             {
                 $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
-            }elseif($request->order_status == 8)
+            }elseif($request->order_status == 9)
             {
                 $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
@@ -273,7 +277,7 @@ class OrderController extends Controller
             {
                 $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
-            }elseif($request->order_status == 8)
+            }elseif($request->order_status == 9)
             {
                 $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
@@ -287,7 +291,7 @@ class OrderController extends Controller
             case 3:
                 $error_msg = 'No cancelled order found!';
                 break;
-            case 8:
+            case 9:
                 $error_msg = 'No completed order found!';
                 break;
         }
