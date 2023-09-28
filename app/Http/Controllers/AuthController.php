@@ -15,6 +15,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use App\Models\PasswordRest;
+use App\Models\SocialLogin;
 
 class AuthController extends Controller
 {
@@ -152,17 +153,164 @@ class AuthController extends Controller
         }
     }
 
-    // public function socialLogin(Request $request)
-    // {
-    //     $this->validate($request, [
-    //         'email' => 'required|email',
-    //         'firstName' => 'required|string',
-    //         'lastName' => 'required|string',
-    //         'userId' => 'required|string',
-    //         'loginType' => 'required|integer'
-    //     ]);
-        
-    // }
+    public function socialLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'email',
+            'role' =>'required|string|in:user,vendor',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'social_user_id' => 'required|string',
+            'login_type' => 'required|integer'
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        switch ($request->login_type) 
+        {
+            case 1:
+                $login_type = 'LOGIN_TYPE_GOOGLE';
+                break;
+            case 2:
+                $login_type = 'LOGIN_TYPE_FACEBOOK';
+                break;
+            case 3:
+                $login_type = 'LOGIN_TYPE_APPLE_ID';
+                break;
+        }
+
+        if($request->email != null)
+        {
+            $user = User::where('email', $request->email)->first();
+
+            if($user)
+            {
+                $isSocialID = SocialLogin::where(['social_user_id' => $request->social_user_id, 'login_type' => $login_type])->first();
+                
+                if($isSocialID)
+                {
+                    $token = JWTAuth::fromUser($user);
+
+                    return response()->json([
+                        'token' => $token,
+                        'token_type' => 'bearer',
+                        'expire_in' => JWTAuth::factory()->getTTL()*60,
+                        'user_id' => $user->id,
+                    ], 200);
+
+                }else{
+
+                    $socialLoginDetails = [
+                        'user_id' => $user->id,
+                        'social_user_id' => $request->social_user_id,
+                        'login_type' => $login_type,
+                    ];
+                    SocialLogin::create($socialLoginDetails);
+
+                    $token = JWTAuth::fromUser($user);
+
+                    return response()->json([
+                        'token' => $token,
+                        'token_type' => 'bearer',
+                        'expire_in' => JWTAuth::factory()->getTTL()*60,
+                        'user_id' => $user->id,
+                    ], 200);
+
+                }
+                
+            }else{
+
+                if($request->role == 'user')
+                {
+                    $userDetails = [
+                        'email' => $request->email,
+                        'role' => $request->role,
+                        'name' => $request->first_name .' '.$request->last_name,
+                    ];
+                    $user = User::create($userDetails);
+                
+                }else if($request->role == 'vendor')
+                {
+                    $vendorDetails = [
+                        'email' => $request->email,
+                        'role' => $request->role,
+                        'business_name' => $request->first_name .' '.$request->last_name,
+                    ];
+                    $user = User::create($vendorDetails);
+                }
+
+                $socialLoginDetails = [
+                    'user_id' => $user->id,
+                    'social_user_id' => $request->social_user_id,
+                    'login_type' => $login_type,
+                ];
+                SocialLogin::create($socialLoginDetails);
+
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expire_in' => JWTAuth::factory()->getTTL()*60,
+                    'user_id' => $user->id,
+                ], 200);
+            }
+           
+        }else{
+            $isSocialID = SocialLogin::where(['social_user_id' => $request->social_user_id, 'login_type' => $login_type])->first();
+            if($isSocialID)
+            {
+                $user = User::where('id', $isSocialID->user_id)->first();
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expire_in' => JWTAuth::factory()->getTTL()*60,
+                    'user_id' => $user->id,
+                ], 200);
+
+            }else{
+
+                if($request->role == 'user')
+                {
+                    $userDetails = [
+                        'role' => $request->role,
+                        'name' => $request->first_name .' '.$request->last_name,
+                    ];
+                    $user = User::create($userDetails);
+                    
+                }else if($request->role == 'vendor')
+                {
+
+                    $vendorDetails = [
+                        'role' => $request->role,
+                        'business_name' => $request->first_name .' '.$request->last_name,
+                    ];
+                    $user = User::create($vendorDetails);
+                }
+
+                $socialLoginDetails = [
+                    'user_id' => $user->id,
+                    'social_user_id' => $request->social_user_id,
+                    'login_type' => $login_type,
+                ];
+                SocialLogin::create($socialLoginDetails);
+
+                $token = JWTAuth::fromUser($user);
+
+                return response()->json([
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expire_in' => JWTAuth::factory()->getTTL()*60,
+                    'user_id' => $user->id,
+                ], 200);
+            }
+        }
+    }
 
 
     public function changePassword(Request $request)

@@ -13,6 +13,7 @@ Route::group( ['middleware' => ['api']],function($router)
 {
     Route::post('/signup',[AuthController::class,'signup']);
     Route::post('/login',[AuthController::class,'login']);
+    Route::post('/socialLogin',[AuthController::class,'socialLogin']);
     Route::get('/categories',[CategoryController::class,'getAllCategories']);
     Route::get('/countries',[AddressController::class,'getAllCountries']);
     Route::get('/states/{country_id?}',[AddressController::class,'getAllStates']);
