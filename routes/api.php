@@ -36,7 +36,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
-    Route::post('/vendorSearch',[SearchController::class,'vendorSearch']);
+    Route::get('/vendorSearch',[SearchController::class,'vendorSearch']);
+    Route::get('/searchByLocation',[SearchController::class,'searchByLocation']);
     
     
 
