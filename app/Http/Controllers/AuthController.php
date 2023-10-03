@@ -199,6 +199,7 @@ class AuthController extends Controller
                         'token_type' => 'bearer',
                         'expire_in' => JWTAuth::factory()->getTTL()*60,
                         'user_id' => $user->id,
+                        'is_published' => $user->is_published,
                     ], 200);
 
                 }else{
@@ -217,6 +218,7 @@ class AuthController extends Controller
                         'token_type' => 'bearer',
                         'expire_in' => JWTAuth::factory()->getTTL()*60,
                         'user_id' => $user->id,
+                        'is_published' => $user->is_published,
                     ], 200);
 
                 }
@@ -256,6 +258,7 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expire_in' => JWTAuth::factory()->getTTL()*60,
                     'user_id' => $user->id,
+                    'is_published' => $user->is_published,
                 ], 200);
             }
            
@@ -271,6 +274,7 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expire_in' => JWTAuth::factory()->getTTL()*60,
                     'user_id' => $user->id,
+                    'is_published' => $user->is_published,
                 ], 200);
 
             }else{
@@ -307,6 +311,7 @@ class AuthController extends Controller
                     'token_type' => 'bearer',
                     'expire_in' => JWTAuth::factory()->getTTL()*60,
                     'user_id' => $user->id,
+                    'is_published' => $user->is_published,
                 ], 200);
             }
         }
