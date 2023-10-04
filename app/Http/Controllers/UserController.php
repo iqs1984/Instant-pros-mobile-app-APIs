@@ -663,17 +663,31 @@ class UserController extends Controller
             'vendor_id'  => 'required|integer',
         ]);
 
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             return $validator->messages()->toJson();
         }
 
-        $reviews = VendorReview::where('vendor_id',$request->vendor_id)->get();
+        $reviews = VendorReview::where('vendor_id', $request->vendor_id)->get();
 
-        if(count($reviews) > 0){
-            return response()->json(['success'=> true, 'data' =>$reviews ], 200);
-        }else{
-            return response()->json(['success'=> false, 'message' =>'No review Found!' ], 200);
+        $jsonObj = array();
+
+        foreach ($reviews as $review) {
+            $userDetails = User::where(['id' => $review->user_id])->first();
+            $user_data = [
+                'username' => $userDetails->name,
+                'user_pic' => $userDetails->profile_image,
+            ];
+
+            $reviewArray = $review->toArray();
+            $merge_data = array_merge($reviewArray, $user_data);
+
+            $jsonObj[] = $merge_data;
+        }
+
+        if (count($reviews) > 0) {
+            return response()->json(['success' => true, 'data' => $jsonObj], 200);
+        } else {
+            return response()->json(['success' => false, 'message' => 'No review Found!'], 200);
         }
     }
 
@@ -712,8 +726,6 @@ class UserController extends Controller
                     $validator->validated(),
                     [   
                         'user_id'  => $user->id,
-                        'username'  => $user->name,
-                        'user_pic'  => $user->profile_image,
                     ]
                 ));
 
