@@ -115,10 +115,13 @@ class AuthController extends Controller
     {
         $this->validate($request, [
             'email' => 'required|email',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6',
+            'role' => 'required|string'
         ]);
 
         $credentials = $request->only('email', 'password');
+
+        // $userDetails = User::where('email', $request->email)->first();
 
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
@@ -134,23 +137,38 @@ class AuthController extends Controller
 
         $user = auth()->user();
 
-        if($user->role == 'user'){
-            return response()->json([
-                'token' => $token,
-                'token_type' => 'bearer',
-                'expire_in' => JWTAuth::factory()->getTTL()*60,
-                'user_id' => $user->id,
-            ], 200);
+
+        if($user->role == $request->role)
+        {
+            if($user->role == 'user'){
+                return response()->json([
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expire_in' => JWTAuth::factory()->getTTL()*60,
+                    'user_id' => $user->id,
+                ], 200);
+    
+            }else{
+                return response()->json([
+                    'token' => $token,
+                    'token_type' => 'bearer',
+                    'expire_in' => JWTAuth::factory()->getTTL()*60,
+                    'user_id' => $user->id,
+                    'is_published' => $user->is_published,
+                ], 200);
+            }
 
         }else{
-            return response()->json([
-                'token' => $token,
-                'token_type' => 'bearer',
-                'expire_in' => JWTAuth::factory()->getTTL()*60,
-                'user_id' => $user->id,
-                'is_published' => $user->is_published,
-            ], 200);
+
+            if($request->role == 'user'){
+                return response()->json(['status' => false, 'error' => 'Please use these credential with vendor login'], 400);
+    
+            }else{
+                return response()->json(['status' => false, 'error' => 'Please use these credential with user login'], 400);
+            }
         }
+
+        
     }
 
     public function socialLogin(Request $request)
