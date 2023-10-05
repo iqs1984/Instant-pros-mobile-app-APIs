@@ -121,8 +121,6 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
-        // $userDetails = User::where('email', $request->email)->first();
-
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json([
@@ -136,7 +134,6 @@ class AuthController extends Controller
         }
 
         $user = auth()->user();
-
 
         if($user->role == $request->role)
         {
@@ -160,15 +157,13 @@ class AuthController extends Controller
 
         }else{
 
-            if($request->role == 'user'){
+            if($request->role == 'user')
+            {
                 return response()->json(['status' => false, 'error' => 'Please use these credential with vendor login'], 400);
-    
             }else{
                 return response()->json(['status' => false, 'error' => 'Please use these credential with user login'], 400);
             }
         }
-
-        
     }
 
     public function socialLogin(Request $request)
