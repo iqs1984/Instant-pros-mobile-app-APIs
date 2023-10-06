@@ -444,7 +444,7 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $notificationList = Notification::with(['user', 'vendor'])->where('receiver_id', $login_user->id)->paginate($perPage);
+        $notificationList = Notification::with(['user', 'vendor'])->where('receiver_id', $login_user->id)->orderBy('created_at', 'desc')->paginate($perPage);
 
         if(count($notificationList) > 0)
         {
