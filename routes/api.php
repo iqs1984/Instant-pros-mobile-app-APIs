@@ -37,7 +37,6 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
     Route::get('/vendorSearch',[SearchController::class,'vendorSearch']);
-    Route::get('/searchByLocation',[SearchController::class,'searchByLocation']);
     
     
 
