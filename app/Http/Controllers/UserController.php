@@ -205,6 +205,42 @@ class UserController extends Controller
         }
     }
 
+    public function convenienceFee(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric',
+            'paymentMode' => 'required|in:wire,card',
+        ]);
+
+        if ($validator->fails()) {
+            return $validator->messages()->toJson();
+        }
+
+        $amount = $request->amount;
+
+        if ($amount >= 0.00 && $amount <= 5000.00) {
+            $standardFee = 3.25;
+            $convenienceFee = 3.05;
+
+            $totalChargeAmount = ($request->paymentMode === 'wire') ? ($amount * ($standardFee / 100)) : ($amount * (($standardFee + $convenienceFee) / 100));
+        } elseif ($amount >= 5000.01 && $amount <= 25000.00) {
+            $flatFee = 162.50;
+            $extraPercent = 0.26;
+            $chargedAmount = $amount - 5000;
+            $totalChargeAmount = $flatFee + ($chargedAmount * ($extraPercent / 100));
+        } else {
+            $flatPercent = 0.89;
+            $totalChargeAmount = $amount * ($flatPercent / 100);
+        }
+
+        if ($totalChargeAmount <= 10.00) {
+            return 10.00;
+        } else {
+            return response()->json(['status' => true,'data'=>round($totalChargeAmount, 2)], 200);
+        }
+    }
+
+
     public function addService(Request $request)
     {
         $vendor = auth()->user();
@@ -938,6 +974,32 @@ class UserController extends Controller
 
         }else{
             return response()->json(['success'=> true, 'message' => 'No vendor review found!'], 200);
+        }
+    }
+
+    public function dateList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'vendor_id' => 'required|integer',
+            'role'      => 'required|string|in:user,vendor',
+        ]);
+
+        if ($validator->fails()) {
+            return $validator->messages()->toJson();
+        }
+
+        $query = VendorSlot::where('vendor_id', $request->vendor_id);
+
+        if ($request->role === 'user') {
+            $query->where('status', '0');
+        }
+
+        $dateArr = $query->pluck('date')->toArray();
+        if (count($dateArr) != 0) 
+        {
+            return response()->json(['success'=> true, 'data' => $dateArr], 200);
+        } else {
+            return response()->json(['success'=> false, 'data' => 'No Date Found'], 400);
         }
     }
 }

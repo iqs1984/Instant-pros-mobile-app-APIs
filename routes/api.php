@@ -37,10 +37,11 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
     Route::get('/vendorSearch',[SearchController::class,'vendorSearch']);
+    Route::post('/convenienceFee',[UserController::class,'convenienceFee']);
+    Route::post('/dateList',[UserController::class,'dateList']);
+    Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
+    Route::post('/unreadNotification',[OrderController::class,'unreadNotification']);
     
-    
-
-
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
     {

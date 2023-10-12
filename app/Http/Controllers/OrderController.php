@@ -452,6 +452,12 @@ class OrderController extends Controller
 
             foreach($notificationList as $data) 
             {
+                if($data->status == '0')
+                {
+                    $data->status = '1';
+                    $data->save();
+                }
+                
                 $notificationData = [
                     'id' => $data->id,
                     'sender_id' => $data->sender_id,
@@ -475,6 +481,39 @@ class OrderController extends Controller
             return response()->json(['success'=> true,'data' => $jsonData], 200);
         }else{
             return response()->json(['success'=> false,'data' =>'No notification found!'], 500);
+        }
+    }
+
+    public function unreadNotification(Request $request)
+    {
+        $login_user = auth()->user();
+
+        $notificationList = Notification::where(['receiver_id' => $login_user->id, 'status' => '0'])->count();
+        
+        if($notificationList > 0){
+            return response()->json(['success'=> true, 'data' => $notificationList ], 200);
+        }else{
+            return response()->json(['success'=> false, 'data' => $notificationList ], 400);
+        }
+    }
+
+    public function deleteNotification(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'notification_id'  => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $deleteNotification = Notification::where('id', $request->notification_id)->delete();
+
+        if($deleteNotification == true){
+            return response()->json(['success'=> true, 'message' =>'Notification deleted successfully' ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Notification not found!' ], 400);
         }
     }
 
