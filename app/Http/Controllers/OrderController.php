@@ -493,7 +493,7 @@ class OrderController extends Controller
         if($notificationList > 0){
             return response()->json(['success'=> true, 'data' => $notificationList ], 200);
         }else{
-            return response()->json(['success'=> false, 'data' => $notificationList ], 400);
+            return response()->json(['success'=> false, 'data' => $notificationList ], 200);
         }
     }
 
