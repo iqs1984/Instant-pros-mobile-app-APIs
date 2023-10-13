@@ -40,7 +40,6 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/convenienceFee',[UserController::class,'convenienceFee']);
     Route::post('/dateList',[UserController::class,'dateList']);
     Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
-    Route::post('/unreadNotification',[OrderController::class,'unreadNotification']);
     
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
@@ -66,6 +65,7 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
         Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
         Route::get('/getNotification',[OrderController::class,'getNotification']);
+        Route::post('/unreadNotification',[OrderController::class,'unreadNotification']);
         // Route::get('/myTransaction',[OrderController::class,'myTransaction']);
     });
 });
