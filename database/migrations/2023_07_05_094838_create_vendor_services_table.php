@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('vendor_id');
             $table->string('title');
-            $table->string('price');
+            $table->double('price',10, 2);
             $table->string('duration');
             $table->longText('image')->nullable();
             $table->string('status')->default('1');

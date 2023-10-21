@@ -23,7 +23,9 @@ return new class extends Migration
             $table->foreign('slot_id')->references('id')->on('vendor_slots')->onDelete('cascade');
             $table->unsignedBigInteger('review_id');
             $table->foreign('review_id')->references('id')->on('vendor_reviews')->onDelete('cascade');
-            $table->integer('amount');
+            $table->double('amount', 10, 2);
+            $table->double('disbursement_fee', 10, 2)->default(10.00);
+            $table->double('processing_fee', 10, 2)->nullable();
             $table->string('address');
             $table->unsignedBigInteger('payment_id')->nullable();
             $table->enum('order_status',['1','2','3','4','5','6','7','8'])->default('1');

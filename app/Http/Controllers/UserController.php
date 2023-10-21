@@ -208,7 +208,7 @@ class UserController extends Controller
     public function convenienceFee(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'amount' => 'required|numeric',
+            'amount' => 'required|Decimal:0,2',
             'paymentMode' => 'required|in:wire,card',
         ]);
 
@@ -240,6 +240,10 @@ class UserController extends Controller
         }
     }
 
+    public function getDisbursementFee(Request $request)
+    {
+        return response()->json(['success' => true, 'disbursement_fee' => 10.00], 200);
+    }
 
     public function addService(Request $request)
     {
@@ -248,7 +252,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'vendor_id'  => 'required',
             'title'    => 'required|string',
-            'price'    => 'required|string',
+            'price'    => 'required|Decimal:0,2',
             'duration' => 'required|string',
             'image' => 'mimes:jpeg,jpg,png',
             'image' => 'required|image|max:2048',
@@ -272,8 +276,7 @@ class UserController extends Controller
             }else{
                 $service = VendorServices::create($validator->validated());
             }
-            return response()->json(['success'=> 'Service added successfully',
-                                      'data' => $service], 200);
+            return response()->json(['success'=> 'Service added successfully','data' => $service], 200);
         }else{
             return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
         }
@@ -284,7 +287,7 @@ class UserController extends Controller
         $validator = Validator::make($request->all(), [
             'service_id'  => 'required',
             'title'       => 'required|string',
-            'price'       => 'required|string',
+            'price'       => 'required|Decimal:0,2',
             'duration'    => 'required|string',
             'image'       => 'mimes:jpeg,jpg,png',
             'image'       => 'image|max:2048',
@@ -373,6 +376,11 @@ class UserController extends Controller
         $allServices = VendorServices::where(['vendor_id' => $request->vendor_id])->paginate($perPage);
         
         if(count($allServices) > 0){
+            $allServices->getCollection()->transform(function ($service) {
+                $service->disbursement_fee = 10.00;
+                return $service;
+            });
+
             return response()->json(['data'=> $allServices], 200);
         }else{
             return response()->json(['error'=> 'No services found'], 200);

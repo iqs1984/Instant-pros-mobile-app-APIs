@@ -78,6 +78,8 @@ class OrderController extends Controller
                 'service_id' => $orderDetails->service_id,
                 'slot_id' => $orderDetails->slot_id,
                 'amount' => $orderDetails->amount,
+                'disbursement_fee' => $orderDetails->disbursement_fee,
+                'processing_fee' => $orderDetails->processing_fee,
                 'address' => $orderDetails->address,
                 'payment_id' => $orderDetails->payment_id,
                 'order_status' => $orderDetails->order_status,
@@ -97,6 +99,30 @@ class OrderController extends Controller
             return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
         }
         
+    }
+
+    public function updateProcessingFee(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id'  => 'required|integer',
+            'processing_fee'  => 'required|Decimal:0,2',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $orderDetails = Order::where('id',$request->order_id)->first();
+
+        if($orderDetails){
+            $orderDetails->processing_fee = $request->processing_fee;
+            $orderDetails->save();
+
+            return response()->json(['success'=> true, 'message' =>'processing fee updated successfully' ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Order not found!' ], 400);
+        }
     }
 
 
@@ -310,6 +336,8 @@ class OrderController extends Controller
                     'slot_id' => $data->slot_id,
                     'amount' => $data->amount,
                     'address' => $data->address,
+                    'disbursement_fee' => $orderDetails->disbursement_fee,
+                    'processing_fee' => $orderDetails->processing_fee,
                     'payment_id' => $data->payment_id,
                     'order_status' => $data->order_status,
                     'accepted_at' => $data->accepted_at,
