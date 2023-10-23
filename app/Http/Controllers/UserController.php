@@ -205,7 +205,7 @@ class UserController extends Controller
         }
     }
 
-    public function convenienceFee(Request $request)
+    public function processingFee(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|Decimal:0,2',

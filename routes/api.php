@@ -36,7 +36,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getVendorSlot',[UserController::class,'getVendorSlot']);
     Route::post('/updateService',[UserController::class,'updateService']);
     Route::post('/ratingPercentage',[UserController::class,'ratingPercentage']);
-    Route::post('/convenienceFee',[UserController::class,'convenienceFee']);
+    Route::post('/processingFee',[UserController::class,'processingFee']);
     Route::post('/dateList',[UserController::class,'dateList']);
     Route::get('/getDisbursementFee',[UserController::class,'getDisbursementFee']);
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
