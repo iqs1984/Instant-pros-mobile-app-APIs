@@ -28,6 +28,7 @@ return new class extends Migration
             $table->double('processing_fee', 10, 2)->nullable();
             $table->string('address');
             $table->unsignedBigInteger('payment_id')->nullable();
+            $table->enum('payment_status',['0','1','2'])->default('0');
             $table->enum('order_status',['1','2','3','4','5','6','7','8'])->default('1');
             $table->date('accepted_at')->nullable();
             $table->timestamps();

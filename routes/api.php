@@ -68,6 +68,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/orderReschedule',[OrderController::class,'orderReschedule']);
         Route::get('/getNotification',[OrderController::class,'getNotification']);
         Route::post('/unreadNotification',[OrderController::class,'unreadNotification']);
-        // Route::get('/myTransaction',[OrderController::class,'myTransaction']);
+        Route::get('/myTransaction',[OrderController::class,'myTransaction']);
     });
 });

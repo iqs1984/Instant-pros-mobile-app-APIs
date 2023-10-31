@@ -35,13 +35,14 @@ class OrderController extends Controller
 
         if($user->role == 'user' && $user->id == $request->user_id)
         {
+            $vendor_name = User::where('id', $request->vendor_id)->first();
             $createOrder = Order::create($validator->validated());
             $slotDetails = VendorSlot::where('id' , $request->slot_id)->first();
 
             if($createOrder){
                 $slotDetails->status = '1';
                 $slotDetails->save();
-                $msg = 'New order received';
+                $msg = 'Your booking is confirmed. Thank you for choosing '.$vendor_name->business_name.'. You will receive a confirmation email shortly.';
 
                 $this->notificationCURL($user->id, $createOrder->vendor_id, $createOrder->id, $msg, $msg, $user->id, $createOrder->vendor_id);
 
@@ -132,6 +133,7 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'order_id'  => 'required|integer',
             'order_status'  => 'required|integer|between:2,8',
+            'payment_object' => 'string',
         ]);
 
         if($validator->fails())
@@ -144,12 +146,15 @@ class OrderController extends Controller
             $query->where('user_id',$login_user->id)->orWhere('vendor_id',$login_user->id);
         })->first();
 
+        $vendor_name = User::where('id', $orderDetails->vendor_id)->first();
+        $user_name = User::where('id', $orderDetails->user_id)->first();
+
         if($orderDetails){
 
             $status_name = "";
             switch ($request->order_status) {
                 case 2:
-                    $status_name = 'Order accepted successfully';
+                    $status_name = $user_name->name." booking accepted! Please review the details and be prepared for the scheduled service. Thank you!";
                     $orderDetails->accepted_at = now();
                     $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
@@ -158,25 +163,35 @@ class OrderController extends Controller
                     $slotDetails->status = '0';
                     $slotDetails->save();
                     if($login_user->role == 'user'){
-                        $status_name = 'Order Cancelled by the user';
+                        $status_name = "Order Cancelled by the customer";
                         $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     }else if($login_user->role == 'vendor'){
                         $status_name = 'Order Cancelled by the vendor';
                         $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
-                    }else{
-
                     }
                     break;
                 case 4:
-                    $status_name = 'payment done successfully';
+                    // if($request->payment_object){
+
+                    //     // convert string obejct to json 
+                    //     // save object into database 
+                    //     // update order status 
+                    //     // update ppayment status
+
+
+                    // }else{
+
+                    // }
+
+                    $status_name = 'Payment successful! Your booking is confirmed. Thank you for choosing '.$vendor_name->business_name.'. Receipt will be emailed.';
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 5:
-                    $status_name = 'Order in progress';
+                    $status_name = 'Booking status updated to "In Progress". Please proceed with the scheduled service. Thank you!';
                     $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 6:
-                    $status_name = 'Order Finished successfully';
+                    $status_name = 'Job completed successfully. Thank you for choosing our services. Please provide your feedback';
                     $this->notificationCURL($orderDetails->vendor_id, $orderDetails->user_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 7:
@@ -184,7 +199,7 @@ class OrderController extends Controller
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
                 case 8:
-                    $status_name = 'Feedback updated successfully';
+                    $status_name = 'Thank you for your feedback! Your input is valuable in enhancing our services. We appreciate it.';
                     $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $status_name, $status_name, $orderDetails->user_id, $orderDetails->vendor_id);
                     break;
             }
@@ -416,6 +431,7 @@ class OrderController extends Controller
         }
 
         $orderDetails = Order::where('id',$request->order_id)->first();
+        $vendor_name = User::where('id', $orderDetails->vendor_id)->first();
         $oldSlotDetails = VendorSlot::where('id',$orderDetails->slot_id)->first();
         $newSlotDetails = VendorSlot::where(['id' => $request->new_slot_id, 'status' => '0'])->first();
 
@@ -435,7 +451,7 @@ class OrderController extends Controller
 
                     if($old_slot_status == true)
                     {
-                        $msg = "Order Rescheduled by the user";
+                        $msg = 'Your booking has been successfully rescheduled. Thank you for choosing '.$vendor_name->business_name.'. New details will follow.';
                         $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
                         return response()->json(['success'=> true,'data' =>'Order rescheduled successfully','order_id' => $orderDetails->id ], 200);
 
@@ -546,38 +562,45 @@ class OrderController extends Controller
     }
 
     
-    // public function myTransaction(Request $request)
-    // {
-    //     $user = auth()->user();
-    //     $perPage = 5;
+    public function myTransaction(Request $request)
+    {
+        $user = auth()->user();
+        $perPage = 20;
 
-    //     $validator = Validator::make($request->all(), [
-    //         'from_date'      => 'date_format:Y-m-d',
-    //         'to_date'   => 'date_format:Y-m-d|after:from_date',
-    //         'payment_status_pending' => 'integer|in:0',
-    //         'payment_status_escrow' => 'integer|in:1',
-    //         'payment_status_paid' => 'integer|in:2',
-    //         'vendor_name' => 'string',
-    //     ]);
+        $validator = Validator::make($request->all(), [
+            'from_date'                 => 'date_format:Y-m-d',
+            'to_date'                   => 'date_format:Y-m-d|after:from_date',
+            'payment_status_pending'    => 'integer|in:0',
+            'payment_status_escrow'     => 'integer|in:1',
+            'payment_status_paid'       => 'integer|in:2',
+            'vendor_name'               => 'string',
+        ]);
 
-    //     if($validator->fails())
-    //     {
-    //         return $validator->messages()->toJson();
-    //     }
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
-    //     $allOrders = $user->orders();
+        $allOrders = $user->orders();
 
-    //     if($request->from_date != '' && $request->to_date != ''){
+        // $totalSpend = $allOrders->sum('amount');
 
-    //         $orderList = $allOrders->whereBetween('created_at',[$request->from_date, $request->to_date]);
-    //     }
-    //     if($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != ''){
-    //     }
+        if($request->from_date != '' && $request->to_date != '')
+        {
+            $orderList = $allOrders->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+        }
 
-    //     if($request->vendor_name != ''){
-    //     }
+        if($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '')
+        {
+            // $orderList = $allOrders->where('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+        }
 
-    //     return response()->json(['success'=> true,'data' =>$orderList->get()], 200);
+        if($request->vendor_name != '')
+        {
 
-    // }
+        }
+
+        return response()->json(['success'=> true,'data' =>$orderList->get(), 'count' => $orderList->count()], 200);
+
+    }
 }
