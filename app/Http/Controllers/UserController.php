@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use App\Rules\StripeKeyValidator;
 use Auth;
 use Validator;
 use App\Models\User;
@@ -16,7 +15,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use App\Models\Category;
-use App\Models\StripeAccountDetails;
+use App\Models\EscrowAccountDetail;
 use App\Models\DocumentText;
 use App\Models\VendorReview;
 use App\Models\VendorSlot;
@@ -564,66 +563,65 @@ class UserController extends Controller
         }
     }
 
-    public function addStripeAccount(Request $request)
+    public function addEscrowAccount(Request $request)
     {
-        $vendor = auth()->user();
+        // $login_user = auth()->user();
 
-        $validator = Validator::make($request->all(), [
-            'publishable_key' => ['required', new StripeKeyValidator],
-            'secret_key' => ['required', new StripeKeyValidator],
-            'vendor_id' =>'required'
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'escrow_email' => 'required',
+        //     'escrow_api_key' => 'required',
+        // ]);
 
-        if($validator->fails())
-        {
-            return $validator->messages()->toJson();
-        }
+        // if($validator->fails())
+        // {
+        //     return $validator->messages()->toJson();
+        // }
 
-        if($request->vendor_id == $vendor->id)
-        {
-            $StripeAccDetails = StripeAccountDetails::where('vendor_id',$request->vendor_id)->first();
+        // if($request->vendor_id == $vendor->id)
+        // {
+        //     $StripeAccDetails = StripeAccountDetails::where('vendor_id',$request->vendor_id)->first();
 
-            if($StripeAccDetails){
+        //     if($StripeAccDetails){
                 
-                $StripeAccDetails->publishable_key = $request->publishable_key;
-                $StripeAccDetails->secret_key = $request->secret_key;
-                $StripeAccDetails->vendor_id = $request->vendor_id;
-                $StripeAccDetails->save();
+        //         $StripeAccDetails->publishable_key = $request->publishable_key;
+        //         $StripeAccDetails->secret_key = $request->secret_key;
+        //         $StripeAccDetails->vendor_id = $request->vendor_id;
+        //         $StripeAccDetails->save();
 
-                return response()->json(['success'=> 'Stripe Account Details updated successfully'],200);
+        //         return response()->json(['success'=> 'Stripe Account Details updated successfully'],200);
 
-            }else{
-                $StripeAccDetails = StripeAccountDetails::create(array_merge(
-                    $validator->validated(),
-                    ['vendor_id'  => $vendor->id]
-                ));
-            }
+        //     }else{
+        //         $StripeAccDetails = StripeAccountDetails::create(array_merge(
+        //             $validator->validated(),
+        //             ['vendor_id'  => $vendor->id]
+        //         ));
+        //     }
         
-            return response()->json(['success'=> 'Stripe Account Details save successfully',
-                                      'data' => $StripeAccDetails], 200);
-        }else{
-            return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
-        }
+        //     return response()->json(['success'=> 'Stripe Account Details save successfully',
+        //                               'data' => $StripeAccDetails], 200);
+        // }else{
+        //     return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
+        // }
     }
 
-    public function getStripeAccount(Request $request)
+    public function getEscrowAccount(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'vendor_id'  => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'vendor_id'  => 'required',
+        // ]);
 
-        if($validator->fails())
-        {
-            return $validator->messages()->toJson();
-        }
+        // if($validator->fails())
+        // {
+        //     return $validator->messages()->toJson();
+        // }
 
-        $StripeAccount = StripeAccountDetails::where(['vendor_id' => $request->vendor_id])->get();
+        // $StripeAccount = StripeAccountDetails::where(['vendor_id' => $request->vendor_id])->get();
         
-        if(count($StripeAccount) > 0){
-            return response()->json(['success'=>true,'message'=>'Stripe Account Details','data'=> $StripeAccount], 200);
-        }else{
-            return response()->json(['success'=>false,'message'=> 'No Stripe Account found'], 201);
-        }
+        // if(count($StripeAccount) > 0){
+        //     return response()->json(['success'=>true,'message'=>'Stripe Account Details','data'=> $StripeAccount], 200);
+        // }else{
+        //     return response()->json(['success'=>false,'message'=> 'No Stripe Account found'], 201);
+        // }
     }
 
     public function setPublishedStatus(Request $request)

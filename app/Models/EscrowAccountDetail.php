@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class StripeAccountDetails extends Model
+class EscrowAccountDetail extends Model
 {
     use HasFactory;
 

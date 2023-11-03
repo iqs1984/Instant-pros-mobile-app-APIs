@@ -102,31 +102,6 @@ class OrderController extends Controller
         
     }
 
-    public function updateProcessingFee(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'order_id'  => 'required|integer',
-            'processing_fee'  => 'required|Decimal:0,2',
-        ]);
-
-        if($validator->fails())
-        {
-            return $validator->messages()->toJson();
-        }
-
-        $orderDetails = Order::where('id',$request->order_id)->first();
-
-        if($orderDetails){
-            $orderDetails->processing_fee = $request->processing_fee;
-            $orderDetails->save();
-
-            return response()->json(['success'=> true, 'message' =>'processing fee updated successfully' ], 200);
-        }else{
-            return response()->json(['success'=> false, 'message' =>'Order not found!' ], 400);
-        }
-    }
-
-
     public function orderUpdate(Request $request)
     {
         $login_user = auth()->user();
@@ -171,7 +146,8 @@ class OrderController extends Controller
                     }
                     break;
                 case 4:
-                    // if($request->payment_object){
+                    // if($request->payment_object && payment_sucess == true){
+                        
 
                     //     // convert string obejct to json 
                     //     // save object into database 
@@ -561,6 +537,30 @@ class OrderController extends Controller
         }
     }
 
+    public function updateProcessingFee(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id'  => 'required|integer',
+            'processing_fee'  => 'required|Decimal:0,2',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $orderDetails = Order::where('id',$request->order_id)->first();
+
+        if($orderDetails){
+            $orderDetails->processing_fee = $request->processing_fee;
+            $orderDetails->save();
+
+            return response()->json(['success'=> true, 'message' =>'processing fee updated successfully' ], 200);
+        }else{
+            return response()->json(['success'=> false, 'message' =>'Order not found!' ], 400);
+        }
+    }
+
     
     public function myTransaction(Request $request)
     {
@@ -602,5 +602,21 @@ class OrderController extends Controller
 
         return response()->json(['success'=> true,'data' =>$orderList->get(), 'count' => $orderList->count()], 200);
 
+    }
+
+    public function paymentSuccessURL(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|integer',
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $url = url('/')."/".$request->order_id."/paymentsucess";
+        
+        return response()->json(['success'=> true, 'url' => $url], 200);
     }
 }

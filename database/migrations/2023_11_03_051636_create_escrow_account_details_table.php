@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stripe_account_details', function (Blueprint $table) {
+        Schema::create('escrow_account_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('vendor_id');
-            $table->longText('publishable_key');
-            $table->longText('secret_key');
-            $table->foreign('vendor_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
+            $table->longText('escrow_email');
+            $table->longText('escrow_api_key');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stripe_account_details');
+        Schema::dropIfExists('escrow_account_details');
     }
 };

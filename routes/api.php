@@ -28,7 +28,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
     Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
-    Route::post('/getStripeAccount',[UserController::class,'getStripeAccount']);
+    Route::post('/getEscrowAccount',[UserController::class,'getEscrowAccount']);
     Route::post('/getDocument',[UserController::class,'getDocument']);
     Route::get('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
     Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
@@ -42,6 +42,8 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
     Route::post('/updateProcessingFee',[OrderController::class,'updateProcessingFee']);
+    Route::get('/paymentSuccessURL',[OrderController::class,'paymentSuccessURL']);
+
     
 
     Route::group( ['middleware' => 'auth.jwt', 'prefix' => 'auth'],function($router)
@@ -54,7 +56,7 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/deleteService',[UserController::class,'deleteService']);
         Route::post('/addVendorAbout',[UserController::class,'addVendorAbout']);
         Route::post('/UpdateUserDetails',[UserController::class,'UpdateUserDetails']);
-        Route::post('/addStripeAccount',[UserController::class,'addStripeAccount']);
+        Route::post('/addEscrowAccount',[UserController::class,'addEscrowAccount']);
         Route::post('/setPublishedStatus',[UserController::class,'setPublishedStatus']);
         Route::post('/createReviews',[UserController::class,'createReviews']);
         Route::post('/addVendorSlot',[UserController::class,'addVendorSlot']);
