@@ -605,18 +605,8 @@ class OrderController extends Controller
     }
 
     public function paymentSuccessURL(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required|integer',
-        ]);
-
-        if($validator->fails())
-        {
-            return $validator->messages()->toJson();
-        }
-
-        $url = url('/')."/".$request->order_id."/paymentsucess";
-        
-        return response()->json(['success'=> true, 'url' => $url], 200);
+    {        
+        return response()->json(['success'=> true, 'response' => $request->input()], 200);
     }
+    
 }

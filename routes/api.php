@@ -42,7 +42,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
     Route::post('/updateProcessingFee',[OrderController::class,'updateProcessingFee']);
-    Route::get('/paymentSuccessURL',[OrderController::class,'paymentSuccessURL']);
+   
 
     
 
