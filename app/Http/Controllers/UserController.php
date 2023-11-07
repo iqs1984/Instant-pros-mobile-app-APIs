@@ -565,63 +565,69 @@ class UserController extends Controller
 
     public function addEscrowAccount(Request $request)
     {
-        // $login_user = auth()->user();
+        $login_user = auth()->user();
 
-        // $validator = Validator::make($request->all(), [
-        //     'escrow_email' => 'required',
-        //     'escrow_api_key' => 'required',
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'escrow_email' => 'required|email',
+            'escrow_api_key' => 'required|string',
+        ]);
 
-        // if($validator->fails())
-        // {
-        //     return $validator->messages()->toJson();
-        // }
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
 
-        // if($request->vendor_id == $vendor->id)
-        // {
-        //     $StripeAccDetails = StripeAccountDetails::where('vendor_id',$request->vendor_id)->first();
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => env('ESCROW_SANDBOX_BASE_URL').'/2017-09-01/customer/me',
+        CURLOPT_RETURNTRANSFER => 1,
+        CURLOPT_USERPWD => $request->escrow_email.':'.$request->escrow_api_key,
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json'
+        ),
+        ));
 
-        //     if($StripeAccDetails){
-                
-        //         $StripeAccDetails->publishable_key = $request->publishable_key;
-        //         $StripeAccDetails->secret_key = $request->secret_key;
-        //         $StripeAccDetails->vendor_id = $request->vendor_id;
-        //         $StripeAccDetails->save();
+        $output = curl_exec($curl);
 
-        //         return response()->json(['success'=> 'Stripe Account Details updated successfully'],200);
+        $response = json_decode($output,true);
+        curl_close($curl);
 
-        //     }else{
-        //         $StripeAccDetails = StripeAccountDetails::create(array_merge(
-        //             $validator->validated(),
-        //             ['vendor_id'  => $vendor->id]
-        //         ));
-        //     }
-        
-        //     return response()->json(['success'=> 'Stripe Account Details save successfully',
-        //                               'data' => $StripeAccDetails], 200);
-        // }else{
-        //     return response()->json(['error'=>'given vendor_id does not match with login vendor_id'], 201);
-        // }
+        if($response != null)
+        {
+            $escrowAccDetails = EscrowAccountDetail::where('user_id',$login_user->id)->first();
+
+            if($escrowAccDetails){
+            
+                $escrowAccDetails->escrow_email = $request->escrow_email;
+                $escrowAccDetails->escrow_api_key = $request->escrow_api_key;
+                $escrowAccDetails->save();
+    
+                return response()->json(['success'=> true, 'data' => $escrowAccDetails],200);
+    
+            }else{
+                $escrowAccDetails = EscrowAccountDetail::create(array_merge(
+                    $validator->validated(),
+                    ['user_id'  => $login_user->id]
+                ));
+
+                return response()->json(['success'=> true,'data' => $escrowAccDetails], 200);
+            }
+        }else{
+            return response()->json(['success'=> false ,'message' => 'Wrong Escrow acount details'], 200);
+        }
     }
 
     public function getEscrowAccount(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'vendor_id'  => 'required',
-        // ]);
+        $login_user = auth()->user();
 
-        // if($validator->fails())
-        // {
-        //     return $validator->messages()->toJson();
-        // }
-
-        // $StripeAccount = StripeAccountDetails::where(['vendor_id' => $request->vendor_id])->get();
+        $escrowAccount = EscrowAccountDetail::where(['user_id' => $login_user->id])->get();
         
-        // if(count($StripeAccount) > 0){
-        //     return response()->json(['success'=>true,'message'=>'Stripe Account Details','data'=> $StripeAccount], 200);
-        // }else{
-        //     return response()->json(['success'=>false,'message'=> 'No Stripe Account found'], 201);
-        // }
+        if(count($escrowAccount) > 0){
+            return response()->json(['success'=>true,'data'=> $escrowAccount], 200);
+        }else{
+            return response()->json(['success'=>false,'message'=> 'No Escrow Account found'], 200);
+        }
     }
 
     public function setPublishedStatus(Request $request)

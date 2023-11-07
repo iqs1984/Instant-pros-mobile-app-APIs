@@ -28,7 +28,6 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::get('/getGalleryImages',[UserController::class,'getGalleryImages']);
     Route::post('/deleteGalleryImage',[UserController::class,'deleteGalleryImage']);
     Route::post('/updateProfileImage',[UserController::class,'updateProfileImage']);
-    Route::post('/getEscrowAccount',[UserController::class,'getEscrowAccount']);
     Route::post('/getDocument',[UserController::class,'getDocument']);
     Route::get('/getVendorByCategoryId',[UserController::class,'getVendorByCategoryId']);
     Route::post('/getVendorReviews',[UserController::class,'getVendorReviews']);
@@ -42,6 +41,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/getOrderDetails',[OrderController::class,'getOrderDetails']);
     Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
     Route::post('/updateProcessingFee',[OrderController::class,'updateProcessingFee']);
+    Route::get('/customerDetails',[UserController::class,'customerDetails']);
    
 
     
@@ -63,6 +63,7 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/addRemoveFavorite',[UserController::class,'addRemoveFavorite']);
         Route::get('/getFavoriteVendors',[UserController::class,'getFavoriteVendors']);
         Route::post('/uploadGalleryImage',[UserController::class,'uploadGalleryImage']);
+        Route::post('/getEscrowAccount',[UserController::class,'getEscrowAccount']);
         Route::post('/createOrder',[OrderController::class,'createOrder']);
         Route::get('/myBooking',[OrderController::class,'myBooking']);
         Route::get('/getOrderByStatus',[OrderController::class,'getOrderByStatus']);

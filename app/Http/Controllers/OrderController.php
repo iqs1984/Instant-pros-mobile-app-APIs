@@ -12,6 +12,7 @@ use App\Models\Category;
 use App\Models\VendorSlot;
 use App\Models\UserFcmTokens;
 use App\Models\Notification;
+use App\Models\EscowPaymentDetail;
 
 class OrderController extends Controller
 {
@@ -68,7 +69,7 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->find($request->order_id);
+        $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','EscowPaymentDetail'])->find($request->order_id);
 
         if ($orderDetails) 
         {
@@ -93,8 +94,9 @@ class OrderController extends Controller
             $vendor = $orderDetails->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
             $service = $orderDetails->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
             $slot = $orderDetails->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
+            $PaymentDetail = $orderDetails->EscowPaymentDetail;
 
-            return response()->json(['success'=> true,'order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot  ], 200);
+            return response()->json(['success'=> true,'order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot, 'payment_detail' => $PaymentDetail], 200);
 
         } else {
             return response()->json(['success'=> false, 'message' =>'Order not found!' ], 200);
@@ -608,5 +610,5 @@ class OrderController extends Controller
     {        
         return response()->json(['success'=> true, 'response' => $request->input()], 200);
     }
-    
+
 }
