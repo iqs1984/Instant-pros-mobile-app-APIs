@@ -43,6 +43,6 @@ class Order extends Model
 
     public function EscowPaymentDetail()
     {
-        return $this->belongsTo(EscowPaymentDetail::class, 'payment_id', 'id');
+        return $this->belongsTo(EscowPaymentDetail::class,'id','order_id');
     }
 }

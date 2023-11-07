@@ -29,9 +29,13 @@ class OrderController extends Controller
             'address'  => 'required|String',
         ]);
 
-        if($validator->fails())
-        {
-            return $validator->messages()->toJson();
+        $validator1 = Validator::make($request->all(), [
+            'escrow_transaction_id' => 'required'
+        ]);
+
+        if ($validator->fails() && $validator1->fails()) {
+            $messages = $validator->messages()->merge($validator1->messages());
+            return $messages->toJson();
         }
 
         if($user->role == 'user' && $user->id == $request->user_id)
@@ -40,9 +44,16 @@ class OrderController extends Controller
             $createOrder = Order::create($validator->validated());
             $slotDetails = VendorSlot::where('id' , $request->slot_id)->first();
 
-            if($createOrder){
+            if($createOrder)
+            {
                 $slotDetails->status = '1';
                 $slotDetails->save();
+
+                $updateEscrowDetails = EscowPaymentDetail::create(
+                [   'order_id' => $createOrder->id,
+                    'transaction_id' => $request->escrow_transaction_id,
+                ]);
+
                 $msg = 'Your booking is confirmed. Thank you for choosing '.$vendor_name->business_name.'. You will receive a confirmation email shortly.';
 
                 $this->notificationCURL($user->id, $createOrder->vendor_id, $createOrder->id, $msg, $msg, $user->id, $createOrder->vendor_id);
@@ -83,7 +94,6 @@ class OrderController extends Controller
                 'disbursement_fee' => $orderDetails->disbursement_fee,
                 'processing_fee' => $orderDetails->processing_fee,
                 'address' => $orderDetails->address,
-                'payment_id' => $orderDetails->payment_id,
                 'order_status' => $orderDetails->order_status,
                 'accepted_at' => $orderDetails->accepted_at,
                 'created_at' => date($orderDetails->created_at),
@@ -274,15 +284,15 @@ class OrderController extends Controller
             $user = $login_user;
             if($request->order_status == 0)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('user_id', $user->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','EscowPaymentDetail'])->where('user_id', $user->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
 
             }elseif($request->order_status == 3)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['user_id' => $user->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','EscowPaymentDetail'])->where(['user_id' => $user->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
             }elseif($request->order_status == 9)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review','EscowPaymentDetail'])->where('user_id', $user->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
             
         }else{
@@ -290,15 +300,15 @@ class OrderController extends Controller
 
             if($request->order_status == 0)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','EscowPaymentDetail'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forUpcoming)->orderBy('updated_at', 'desc')->paginate($perPage);
 
             }elseif($request->order_status == 3)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','EscowPaymentDetail'])->where(['vendor_id' => $vendor->id,'order_status' => '3'])->orderBy('updated_at', 'desc')->paginate($perPage);
                 
             }elseif($request->order_status == 9)
             {
-                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
+                $orderDetails = Order::with(['user', 'vendor', 'service', 'slot','review','EscowPaymentDetail'])->where('vendor_id', $vendor->id)->whereIn('order_status', $forCompleted)->orderBy('updated_at', 'desc')->paginate($perPage);
             }
 
         }
@@ -331,7 +341,6 @@ class OrderController extends Controller
                     'address' => $data->address,
                     'disbursement_fee' => $data->disbursement_fee,
                     'processing_fee' => $data->processing_fee,
-                    'payment_id' => $data->payment_id,
                     'order_status' => $data->order_status,
                     'accepted_at' => $data->accepted_at,
                     'created_at' => date($data->created_at),
@@ -342,11 +351,12 @@ class OrderController extends Controller
                 $vendor = $data->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
                 $service = $data->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
                 $slot = $data->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
+                $PaymentDetail = $data->EscowPaymentDetail;
                 $review = null;
                 if($data->review != null){
                     $review = $data->review->only(['id', 'vendor_id', 'user_id', 'order_id','service_id','username','user_pic','comment','rating']);
                 }
-                $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot,'review' => $review];
+                $jsonData[] = ['order' =>$order, 'user' =>$user, 'vendor' =>$vendor, 'service' =>$service, 'slot' =>$slot,'review' => $review,'PaymentDetail' => $PaymentDetail];
             }
             return response()->json(['success'=> true,'data' =>$jsonData], 200);
 
