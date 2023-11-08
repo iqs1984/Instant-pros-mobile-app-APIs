@@ -29,13 +29,9 @@ class OrderController extends Controller
             'address'  => 'required|String',
         ]);
 
-        $validator1 = Validator::make($request->all(), [
-            'escrow_transaction_id' => 'required'
-        ]);
-
-        if ($validator->fails() && $validator1->fails()) {
-            $messages = $validator->messages()->merge($validator1->messages());
-            return $messages->toJson();
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
         }
 
         if($user->role == 'user' && $user->id == $request->user_id)
@@ -49,10 +45,13 @@ class OrderController extends Controller
                 $slotDetails->status = '1';
                 $slotDetails->save();
 
-                $updateEscrowDetails = EscowPaymentDetail::create(
-                [   'order_id' => $createOrder->id,
-                    'transaction_id' => $request->escrow_transaction_id,
-                ]);
+                if($request->escrow_transaction_id != null)
+                {
+                    $updateEscrowDetails = EscowPaymentDetail::create(
+                        [   'order_id' => $createOrder->id,
+                            'transaction_id' => $request->escrow_transaction_id,
+                        ]);
+                }
 
                 $msg = 'Your booking is confirmed. Thank you for choosing '.$vendor_name->business_name.'. You will receive a confirmation email shortly.';
 
@@ -619,6 +618,35 @@ class OrderController extends Controller
     public function paymentSuccessURL(Request $request)
     {        
         return response()->json(['success'=> true, 'response' => $request->input()], 200);
+    }
+
+    public function updateEscrowTransctionID(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'escrow_transaction_id' => 'required'
+        ]);
+
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+
+        $escrowDetails = EscowPaymentDetail::where('order_id', $request->order_id)->first();
+
+        if($escrowDetails){
+            $escrowDetails->transaction_id = $request->escrow_transaction_id;
+            $escrowDetails->save();
+            return response()->json(['success'=> true, 'message' =>'transaction id updated successfully' ], 200);
+        }else{
+            
+            $createEscrowDetails = EscowPaymentDetail::create([
+                'order_id' => $request->order_id,
+                'transaction_id' => $request->escrow_transaction_id,
+            ]);
+            
+            return response()->json(['success'=> true, 'message' =>'transaction id added successfully' ], 200);
+        }
     }
 
 }
