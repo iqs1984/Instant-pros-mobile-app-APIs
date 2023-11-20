@@ -57,7 +57,7 @@ class OrderController extends Controller
 
                 $this->notificationCURL($user->id, $createOrder->vendor_id, $createOrder->id, $msg, $msg, $user->id, $createOrder->vendor_id);
 
-                return response()->json(['success'=> true, 'message' => 'Order Created successfully','order_id' =>$createOrder->id ], 200);
+                return response()->json(['success'=> true, 'message' => $msg ,'order_id' =>$createOrder->id ], 200);
             }else{
                 return response()->json(['success'=> false, 'message' =>'Something went wrong!' ], 200);
             }
@@ -440,7 +440,7 @@ class OrderController extends Controller
                     {
                         $msg = 'Your booking has been successfully rescheduled. Thank you for choosing '.$vendor_name->business_name.'. New details will follow.';
                         $this->notificationCURL($orderDetails->user_id, $orderDetails->vendor_id, $orderDetails->id, $msg, $msg, $orderDetails->user_id, $orderDetails->vendor_id);
-                        return response()->json(['success'=> true,'data' =>'Order rescheduled successfully','order_id' => $orderDetails->id ], 200);
+                        return response()->json(['success'=> true,'data' => $msg,'order_id' => $orderDetails->id ], 200);
 
                     }else{
 
