@@ -233,9 +233,11 @@ class UserController extends Controller
         }
 
         if ($totalChargeAmount <= 10.00) {
-            return response()->json(['status' => true,'data' => number_format(10.00, 2)], 200);
+            return response()->json(['status' => true,'data' => number_format(00.00, 2)], 200);
+            // return response()->json(['status' => true,'data' => number_format(10.00, 2)], 200);
         } else {
-            return response()->json(['status' => true,'data' => number_format($totalChargeAmount, 2)], 200);
+            return response()->json(['status' => true,'data' => number_format(00.00, 2)], 200);
+            // return response()->json(['status' => true,'data' => number_format($totalChargeAmount, 2)], 200);
         }
     }
 

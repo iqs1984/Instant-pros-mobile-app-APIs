@@ -581,10 +581,60 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'from_date'                 => 'date_format:Y-m-d',
             'to_date'                   => 'date_format:Y-m-d|after:from_date',
-            'payment_status_pending'    => 'integer|in:0',
-            'payment_status_escrow'     => 'integer|in:1',
-            'payment_status_paid'       => 'integer|in:2',
-            'vendor_name'               => 'string',
+            'payment_status_pending'    => 'string|in:0',
+            'payment_status_escrow'     => 'string|in:1',
+            'payment_status_paid'       => 'string|in:2',
+            'username'                  => 'string',
+            'page'                      => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return $validator->messages()->toJson();
+        }
+
+        $allOrders = $user->orders()->where('order_status', '>=', '4')->orderBy('created_at', 'desc');
+        $count_all_orders = $allOrders->get();
+
+        if (count($count_all_orders) > 0) 
+        {
+            $totalSpend = $allOrders->sum('amount');
+            $orderList = $allOrders;
+
+            if ($request->from_date != '' && $request->to_date != '') {
+                $orderList = $orderList->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+            }
+
+            if ($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '' ) 
+            {
+                $orderList = $orderList->where(function ($query) use ($request) {
+                    $query->where('payment_status', $request->payment_status_pending)
+                        ->orWhere('payment_status', $request->payment_status_escrow)
+                        ->orWhere('payment_status', $request->payment_status_paid);
+                });
+            }
+
+            if ($request->username != '') {
+                if ($user->role == 'user') {
+                    $vendor_id_arr = User::where('business_name', 'LIKE', '%' . $request->username . '%')->pluck('id')->toArray();
+                    $orderList = $orderList->whereIn('vendor_id', $vendor_id_arr);
+                } else {
+                    $user_id_arr = User::where('name', 'LIKE', '%' . $request->username . '%')->pluck('id')->toArray();
+                    $orderList = $orderList->whereIn('user_id', $user_id_arr);
+                }
+            }
+
+            return response()->json(['success' => true, 'data' => $orderList->paginate($perPage), 'total_spend' => $totalSpend], 200);
+
+        } else {
+            return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
+        }
+    }
+
+    public function updatePaymentStatus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required|integer',
+            'payment_status' => 'required|string|in:1,2'
         ]);
 
         if($validator->fails())
@@ -592,27 +642,15 @@ class OrderController extends Controller
             return $validator->messages()->toJson();
         }
 
-        $allOrders = $user->orders();
+        $orderDetails = Order::where('id', $request->order_id)->first();
 
-        // $totalSpend = $allOrders->sum('amount');
-
-        if($request->from_date != '' && $request->to_date != '')
-        {
-            $orderList = $allOrders->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+        if($orderDetails){
+            $orderDetails->payment_status = $request->payment_status;
+            $orderDetails->save();
+            return response()->json(['success'=> true, 'message' =>'payment status updated successfully' ], 200);
         }
-
-        if($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '')
-        {
-            // $orderList = $allOrders->where('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
-        }
-
-        if($request->vendor_name != '')
-        {
-
-        }
-
-        return response()->json(['success'=> true,'data' =>$orderList->get(), 'count' => $orderList->count()], 200);
-
+        
+        return response()->json(['success'=> false, 'message' =>'No order found' ], 200);
     }
 
     public function paymentSuccessURL(Request $request)

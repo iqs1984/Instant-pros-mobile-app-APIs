@@ -42,6 +42,7 @@ Route::group( ['middleware' => ['api']],function($router)
     Route::post('/deleteNotification',[OrderController::class,'deleteNotification']);
     Route::post('/updateProcessingFee',[OrderController::class,'updateProcessingFee']);
     Route::post('/updateEscrowTransctionID',[OrderController::class,'updateEscrowTransctionID']);
+    Route::post('/updatePaymentStatus',[OrderController::class,'updatePaymentStatus']);
    
 
     
