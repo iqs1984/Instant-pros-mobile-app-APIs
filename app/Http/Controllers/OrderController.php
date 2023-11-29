@@ -665,7 +665,7 @@ class OrderController extends Controller
                 }
     
                 $orderListArr = $orderList->get();
-                if(count($orderListArr) > 0)
+                if($orderListArr->count() > 0)
                 {
                     $newOrderList = array();
 
