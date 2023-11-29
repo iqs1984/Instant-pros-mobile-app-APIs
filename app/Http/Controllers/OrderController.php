@@ -622,18 +622,23 @@ class OrderController extends Controller
                 }
 
                 $orderListArr = $orderList->get();
-                $newOrderList = array();
 
-                foreach($orderListArr as $order)
+                if(count($orderListArr) > 0)
                 {
-                    $username = User::where('id', $order->vendor_id)->first();
-                    $newOrderList[] = array_merge($order->toArray(),['vendor_name' => $username->business_name]); 
+                    $newOrderList = array();
+
+                    foreach($orderListArr as $order)
+                    {
+                        $username = User::where('id', $order->vendor_id)->first();
+                        $newOrderList[] = array_merge($order->toArray(),['vendor_name' => $username->business_name]); 
+                    }
+    
+                    return response()->json(['success' => true, 'data' => $newOrderList, 'total_spend' => $totalSpend], 200);
+                }else{
+                    return response()->json(['success' => false, 'message' => 'Enter correct filter'], 200);
                 }
-
-                return response()->json(['success' => true, 'data' => $newOrderList, 'total_spend' => $totalSpend], 200);
-
             } else {
-                return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
+                return response()->json(['success' => false, 'message' => 'No transaction found'], 200);
             }
 
         } else{
@@ -665,7 +670,7 @@ class OrderController extends Controller
                 }
     
                 $orderListArr = $orderList->get();
-                if($orderListArr->count() > 0)
+                if(count($orderListArr) > 0)
                 {
                     $newOrderList = array();
 
@@ -678,7 +683,7 @@ class OrderController extends Controller
                     return response()->json(['success' => true, 'data' => $newOrderList, 'total_earning' => $totalSpend], 200);
 
                 }else{
-                    return response()->json(['success' => false, 'message' => 'please enter correct keyword'], 200);
+                    return response()->json(['success' => false, 'message' => 'Enter correct filter'], 200);
                 }
             } else {
                 return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
