@@ -575,7 +575,7 @@ class OrderController extends Controller
     
     public function myTransaction(Request $request)
     {
-        $user = auth()->user();
+        $login_user = auth()->user();
         $perPage = 20;
 
         $validator = Validator::make($request->all(), [
@@ -585,48 +585,104 @@ class OrderController extends Controller
             'payment_status_escrow'     => 'string|in:1',
             'payment_status_paid'       => 'string|in:2',
             'username'                  => 'string',
-            'page'                      => 'required|integer',
+            'page'                      => 'required|integer|min:1',
         ]);
 
         if ($validator->fails()) {
             return $validator->messages()->toJson();
         }
 
-        $allOrders = $user->orders()->where('order_status', '>=', '4')->orderBy('created_at', 'desc');
-        $count_all_orders = $allOrders->get();
-
-        if (count($count_all_orders) > 0) 
+        if($login_user->role == 'user')
         {
-            $totalSpend = $allOrders->sum('amount');
-            $orderList = $allOrders;
+            $allOrders = Order::where('user_id', $login_user->id)->where('order_status', '>=', '4')->orderBy('created_at', 'desc');
+            $count_all_orders = $allOrders->get();
 
-            if ($request->from_date != '' && $request->to_date != '') {
-                $orderList = $orderList->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
-            }
-
-            if ($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '' ) 
+            if (count($count_all_orders) > 0) 
             {
-                $orderList = $orderList->where(function ($query) use ($request) {
-                    $query->where('payment_status', $request->payment_status_pending)
-                        ->orWhere('payment_status', $request->payment_status_escrow)
-                        ->orWhere('payment_status', $request->payment_status_paid);
-                });
-            }
+                $totalSpend = $allOrders->sum('amount');
+                $orderList = $allOrders;
 
-            if ($request->username != '') {
-                if ($user->role == 'user') {
+                if ($request->from_date != '' && $request->to_date != '') {
+                    $orderList = $orderList->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+                }
+
+                if ($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '' ) 
+                {
+                    $orderList = $orderList->where(function ($query) use ($request) {
+                        $query->where('payment_status', $request->payment_status_pending)
+                            ->orWhere('payment_status', $request->payment_status_escrow)
+                            ->orWhere('payment_status', $request->payment_status_paid);
+                    });
+                }
+
+                if ($request->username != '') 
+                {
                     $vendor_id_arr = User::where('business_name', 'LIKE', '%' . $request->username . '%')->pluck('id')->toArray();
                     $orderList = $orderList->whereIn('vendor_id', $vendor_id_arr);
-                } else {
+                }
+
+                $orderListArr = $orderList->get();
+                $newOrderList = array();
+
+                foreach($orderListArr as $order)
+                {
+                    $username = User::where('id', $order->vendor_id)->first();
+                    $newOrderList[] = array_merge($order->toArray(),['vendor_name' => $username->business_name]); 
+                }
+
+                return response()->json(['success' => true, 'data' => $newOrderList, 'total_spend' => $totalSpend], 200);
+
+            } else {
+                return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
+            }
+
+        } else{
+            $allOrders = Order::where('vendor_id', $login_user->id)->where('order_status', '>=', '4')->orderBy('created_at', 'desc');
+            $count_all_orders = $allOrders->get();
+
+            if (count($count_all_orders) > 0) 
+            {
+                $totalSpend = $allOrders->sum('amount');
+                $orderList = $allOrders;
+    
+                if ($request->from_date != '' && $request->to_date != '') {
+                    $orderList = $orderList->whereDate('created_at', '>=', $request->from_date)->whereDate('created_at', '<=', $request->to_date);
+                }
+    
+                if ($request->payment_status_pending != '' || $request->payment_status_escrow != '' || $request->payment_status_paid != '' ) 
+                {
+                    $orderList = $orderList->where(function ($query) use ($request) {
+                        $query->where('payment_status', $request->payment_status_pending)
+                            ->orWhere('payment_status', $request->payment_status_escrow)
+                            ->orWhere('payment_status', $request->payment_status_paid);
+                    });
+                }
+    
+                if ($request->username != '') 
+                {
                     $user_id_arr = User::where('name', 'LIKE', '%' . $request->username . '%')->pluck('id')->toArray();
                     $orderList = $orderList->whereIn('user_id', $user_id_arr);
                 }
+    
+                $orderListArr = $orderList->get();
+                if(count($orderListArr) > 0)
+                {
+                    $newOrderList = array();
+
+                    foreach($orderListArr as $order)
+                    {
+                        $username = User::where('id', $order->user_id)->first();
+                        $newOrderList[] = array_merge($order->toArray(),['user_name' => $username->name]); 
+                    }
+
+                    return response()->json(['success' => true, 'data' => $newOrderList, 'total_earning' => $totalSpend], 200);
+
+                }else{
+                    return response()->json(['success' => false, 'message' => 'please enter correct keyword'], 200);
+                }
+            } else {
+                return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
             }
-
-            return response()->json(['success' => true, 'data' => $orderList->paginate($perPage), 'total_spend' => $totalSpend], 200);
-
-        } else {
-            return response()->json(['success' => false, 'message' => 'no transaction found'], 200);
         }
     }
 
