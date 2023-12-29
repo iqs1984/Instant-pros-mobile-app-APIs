@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('profile_image')->nullable();
             $table->string('address')->nullable();
+            $table->string('longitude')->nullable();
+            $table->string('latitude')->nullable();
             $table->integer('country_id')->nullable();
             $table->string('country_name')->nullable();
             $table->integer('state_id')->nullable();

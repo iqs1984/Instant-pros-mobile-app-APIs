@@ -27,6 +27,8 @@ class OrderController extends Controller
             'slot_id'  => 'required|integer',
             'amount'  => 'required|integer',
             'address'  => 'required|String',
+            'longitude'  => 'required|String',
+            'latitude'  => 'required|String',
         ]);
 
         if($validator->fails())

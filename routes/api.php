@@ -73,5 +73,9 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::get('/getNotification',[OrderController::class,'getNotification']);
         Route::post('/unreadNotification',[OrderController::class,'unreadNotification']);
         Route::get('/myTransaction',[OrderController::class,'myTransaction']);
+        Route::post('/saveUserSecondaryAddress',[AddressController::class,'saveUserSecondaryAddress']);
+        Route::post('/updateUserSecondaryAddress',[AddressController::class,'updateUserSecondaryAddress']);
+        Route::post('/deleteUserSecondaryAddress',[AddressController::class,'deleteUserSecondaryAddress']);
+        Route::get('/UserSecondaryAddressList',[AddressController::class,'UserSecondaryAddressList']);
     });
 });

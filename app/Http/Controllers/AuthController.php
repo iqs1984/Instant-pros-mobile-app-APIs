@@ -38,6 +38,8 @@ class AuthController extends Controller
                 'password'   => 'required|string|confirmed|min:6',
                 'phone'      => 'required|string',
                 'address'    => 'required|string',
+                'longitude'    => 'required|string',
+                'latitude'    => 'required|string',
             ]);
     
         }else if($request->role == 'vendor'){
