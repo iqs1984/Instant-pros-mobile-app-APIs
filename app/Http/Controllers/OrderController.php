@@ -95,13 +95,15 @@ class OrderController extends Controller
                 'disbursement_fee' => $orderDetails->disbursement_fee,
                 'processing_fee' => $orderDetails->processing_fee,
                 'address' => $orderDetails->address,
+                'longitude' => $orderDetails->longitude,
+                'latitude' => $orderDetails->latitude,
                 'order_status' => $orderDetails->order_status,
                 'accepted_at' => $orderDetails->accepted_at,
                 'created_at' => date($orderDetails->created_at),
                 'updated_at' => date($orderDetails->updated_at),
             ];
 
-            $user = $orderDetails->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId']);
+            $user = $orderDetails->user->only(['id', 'name', 'email', 'role','phone','profile_image','address','longitude','latitude','country_id','country_name','state_id','state_name','city_id','city_name','zip_code','chatUserId']);
             $vendor = $orderDetails->vendor->only(['id', 'business_name', 'email','role', 'category_id','category_name','profile_image','phone','country_id','country_name','state_id','state_name','city_id','city_name','address','zip_code','chatUserId','is_published']);
             $service = $orderDetails->service->only(['id', 'vendor_id', 'title', 'price','duration','image','status']);
             $slot = $orderDetails->slot->only(['id', 'vendor_id', 'date', 'start_time','end_time','status']);
