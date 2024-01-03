@@ -9,6 +9,7 @@ use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
 use App\Models\UserSecondaryAddress;
+use App\Models\Order;
 
 
 class AddressController extends Controller
@@ -199,6 +200,31 @@ class AddressController extends Controller
             return response()->json(['success'=>true,'data' => $address_list], 200);
         }else{
             return response()->json(['success'=>false,'data'=> 'No Secondary Address Found!'], 404);
+        }
+    }
+
+    public function updateOrderAddress(Request $request)
+    {
+        $user = auth()->user();
+        $validator = Validator::make($request->all(), [
+            'order_id'  => 'required|integer',
+            'address'   => 'required|string',
+            'longitude' => 'required|string',
+            'latitude'  => 'required|string',
+        ]);
+        if($validator->fails())
+        {
+            return $validator->messages()->toJson();
+        }
+        $order_details = Order::where(['id' => $request->order_id, 'user_id' => $user->id] )->first();
+        if($order_details){
+            $order_details->address = $request->address;
+            $order_details->longitude = $request->longitude;
+            $order_details->latitude = $request->latitude;
+            $order_details->save();
+            return response()->json(['success'=>true,'message' => 'Address updated successfully' ], 200);
+        }else{
+            return response()->json(['success'=>false,'data'=> 'Something went wrong!'], 404);
         }
     }
 }

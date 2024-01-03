@@ -77,5 +77,6 @@ Route::group( ['middleware' => ['api']],function($router)
         Route::post('/updateUserSecondaryAddress',[AddressController::class,'updateUserSecondaryAddress']);
         Route::post('/deleteUserSecondaryAddress',[AddressController::class,'deleteUserSecondaryAddress']);
         Route::get('/UserSecondaryAddressList',[AddressController::class,'UserSecondaryAddressList']);
+        Route::post('/updateOrderAddress',[AddressController::class,'updateOrderAddress']);
     });
 });
