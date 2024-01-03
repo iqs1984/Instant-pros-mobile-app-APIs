@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('state_name')->nullable();
             $table->integer('country_id')->nullable();
             $table->string('country_name')->nullable();
-            $table->integer('zip_code')->nullable();
+            $table->string('zip_code')->nullable();
             $table->string('longitude')->nullable();
             $table->string('latitude')->nullable();
             $table->timestamps();

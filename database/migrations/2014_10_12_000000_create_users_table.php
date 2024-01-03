@@ -31,7 +31,7 @@ return new class extends Migration
             $table->string('state_name')->nullable();
             $table->integer('city_id')->nullable();
             $table->string('city_name')->nullable();
-            $table->integer('zip_code')->nullable();
+            $table->string('zip_code')->nullable();
             $table->string('chatUserId')->nullable();
             $table->enum('is_published',['0','1'])->default('0');
             $table->rememberToken();

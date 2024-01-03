@@ -55,7 +55,7 @@ class AuthController extends Controller
                 'state_id'      => 'required|integer',
                 'city_id'       => 'required|integer',
                 'address'       => 'required|string',
-                'zip_code'      => 'required|integer',                
+                'zip_code'      => 'required|string',                
             ]);
 
         }else{

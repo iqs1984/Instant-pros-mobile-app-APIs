@@ -57,7 +57,7 @@ class UserController extends Controller
                 'country_id'    => 'required|integer',
                 'state_id'      => 'required|integer',
                 'city_id'       => 'required|integer',
-                'zip_code'      => 'required|integer',
+                'zip_code'      => 'required|string',
                 'phone'         => 'required|string|unique:users,phone,'.$user->id.'phone',  
             ]);
     
@@ -71,7 +71,7 @@ class UserController extends Controller
                 'country_id'    => 'required|integer',
                 'state_id'      => 'required|integer',
                 'city_id'       => 'required|integer',
-                'zip_code'      => 'required|integer',
+                'zip_code'      => 'required|string',
                 'phone'         => 'required|string|unique:users,phone,'.$user->id.'phone',          
             ]);
         }

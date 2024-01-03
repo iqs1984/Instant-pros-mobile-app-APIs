@@ -89,7 +89,7 @@ class AddressController extends Controller
             'city_id'        => 'required|integer',
             'state_id'       => 'required|integer',
             'country_id'     => 'required|integer',
-            'zip_code'       => 'required|integer',  
+            'zip_code'       => 'required|string',  
             'longitude'      => 'required|string',  
             'latitude'       => 'required|string',  
         ]);
@@ -133,7 +133,7 @@ class AddressController extends Controller
             'city_id'           => 'required|integer',
             'state_id'          => 'required|integer',
             'country_id'        => 'required|integer',
-            'zip_code'          => 'required|integer',
+            'zip_code'          => 'required|string',
             'longitude'         => 'required|string',  
             'latitude'          => 'required|string',  
         ]);
